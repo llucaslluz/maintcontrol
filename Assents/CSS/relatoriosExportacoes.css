@@ -1,0 +1,98 @@
+/* 🔷 Conteúdo principal */
+.conteudo {
+  padding: 2rem;
+  margin-left: 240px;
+  max-width: 1000px;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fc;
+}
+
+/* 🔷 Título e descrição */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: #555;
+  margin-bottom: 1.5rem;
+}
+
+/* 🔷 Formulário de Filtros */
+.filtros fieldset {
+  border: 1px solid #ccc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.filtros legend {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtros label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.filtros select,
+.filtros input[type="date"] {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 0.3rem;
+}
+
+/* 🔷 Botões */
+.botoes-acao {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: #0077cc;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background-color: white;
+  color: #0077cc;
+  border: 1px solid #0077cc;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #005fa3;
+}
+
+.btn-outline:hover {
+  background-color: #e6f0ff;
+}
+
+/* 🔷 Resultado */
+.resultado {
+  margin-top: 2rem;
+}
+
+.resultado h2 {
+  margin-bottom: 1rem;
+}
+
+#areaResultado {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  min-height: 120px;
+}

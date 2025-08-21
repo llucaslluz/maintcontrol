@@ -1,0 +1,152 @@
+/* 🔷 Reset básico */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f7f9fb;
+  color: #222;
+}
+
+/* 🔷 Container principal */
+.conteudo {
+  padding: 2rem;
+  margin-left: 240px; /* espaço da sidebar */
+  max-width: 800px;
+}
+
+/* 🔷 Títulos */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* 🔷 Área do formulário */
+.form-perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 🔷 Foto do perfil */
+.perfil-foto {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.perfil-foto img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #0066cc;
+}
+
+.foto-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 🔷 Fieldset geral */
+fieldset {
+  border: 1px solid #ccc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+legend {
+  font-weight: bold;
+  padding: 0 0.5rem;
+}
+
+/* 🔷 Inputs e Labels */
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background-color: #fefefe;
+}
+
+/* 🔷 Botões */
+.form-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #0066cc;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #004fa3;
+}
+
+.btn-outline {
+  background-color: white;
+  border: 1px solid #0066cc;
+  color: #0066cc;
+}
+
+.btn-outline:hover {
+  background-color: #e6f0ff;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  border: none;
+  color: #888;
+}
+
+.btn-ghost:hover {
+  color: #444;
+}
+
+/* 🔷 Responsivo */
+@media (max-width: 768px) {
+  .conteudo {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .perfil-foto {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

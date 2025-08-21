@@ -1,0 +1,63 @@
+.botao-emergencia {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #d32f2f;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  z-index: 1000;
+  cursor: pointer;
+  animation: piscar 1s infinite;
+}
+
+@keyframes piscar {
+  0%, 100% { background-color: #d32f2f; }
+  50% { background-color: #b71c1c; }
+}
+
+.modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+}
+
+.botoes-modal {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Estilo visual para linha de chamado de emergência */
+.chamado-emergencia {
+  animation: piscar 1s infinite;
+  background-color: #ffe5e5 !important;
+  font-weight: bold;
+}
+
+/* Tag visual adicional (opcional) */
+.tag-emergencia {
+  color: red;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 5px;
+}

@@ -1,0 +1,48 @@
+.anexo-modal {
+  display: none;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.anexo-modal.show {
+  display: block;
+}
+
+.anexo-modal input[type="file"] {
+  margin: 10px 0 10px;
+  font-size: 14px;
+}
+
+/* Botões padrão */
+.anexo-modal button {
+  padding: 8px 14px;
+  font-size: 14px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  background-color: #3a5286;
+  transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Hover azul claro */
+.anexo-modal button:hover {
+  background-color: #5c7bd9;
+}
+
+/* Botão cancelar = vermelho */
+.anexo-modal button:last-child {
+  background-color: #c62828;
+}
+
+.anexo-modal button:last-child:hover {
+  background-color: #b71c1c;
+}

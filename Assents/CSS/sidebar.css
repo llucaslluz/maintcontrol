@@ -1,0 +1,167 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* 🔷 SIDEBAR FIXA NA LATERAL */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 200px;
+  background-color: #3a5286;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* 🔷 LOGO */
+.logo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.logo-img {
+  width: 130px;
+  height: auto;
+  margin-bottom: 3px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+/* 🔷 MENU */
+.menu-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  width: 100%;
+}
+
+.menu-superior {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 10px;
+}
+
+.menu-superior a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.menu-superior a:hover,
+.menu-superior a.active {
+  background-color: #5c7bd9;
+  transform: translateX(4px);
+}
+
+/* 🔷 BOTÃO SAIR */
+.menu-inferior {
+  padding: 0 10px;
+  margin-top: auto;
+}
+
+.menu-inferior hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 10px;
+}
+
+.sair-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  color: white;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background-color: #c62828;
+  transition: background-color 0.3s;
+}
+
+.sair-link:hover {
+  background-color: #b71c1c;
+}
+
+/* 🔶 CONTEÚDO PRINCIPAL (ajustado para compensar sidebar fixa) */
+.conteudo {
+  margin-left: 200px; /* mesma largura da sidebar */
+  padding: 30px;
+  min-height: 100vh;
+  overflow-x: auto;
+}
+
+/* 🔽 DROPDOWNS */
+.menu-dropdown {
+  width: 100%;
+}
+
+.menu-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+
+.menu-title:hover {
+  background-color: #5c7bd9;
+}
+
+.submenu {
+  display: none;
+  flex-direction: column;
+  padding-left: 0px;
+  margin-top: 5px;
+}
+
+.submenu.open {
+  display: flex;
+}
+
+.submenu a {
+  color: white;
+  font-size: 13px;
+  text-decoration: none;
+  padding: 6px;
+  transition: color 0.2s;
+}
+
+.submenu a:hover {
+  color: #aad1ff;
+}
+

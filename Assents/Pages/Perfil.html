@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Perfil - MaintControl</title>
+  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png" />
+  
+  <!-- Estilos gerais + sidebar -->
+  <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <link rel="stylesheet" href="../CSS/perfil.css" />
+
+  <!-- Scripts gerais -->
+  <script defer src="../JS/sidebar.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script defer src="../JS/perfil.js"></script>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-box">
+      <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
+      <span class="logo-text">MaintControl</span>
+    </div>
+
+    <div class="menu-container">
+      <nav class="menu-superior">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
+          <div class="submenu">
+            <a href="../Pages/AbrirChamadoUsuario.html">Abrir Chamado</a>
+            <a href="../Pages/ListagemChamados.html">Lista de Chamados</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
+          <div class="submenu">
+            <a href="../Pages/Mapa.html">Mapas</a>
+            <a href="../Pages/MapaMaquinas.html">Máquinas</a>
+            <a href="../Pages/MapaCaldeiraria.html">Caldeiraria</a>
+            <a href="../Pages/MapaFabricaEletrica.html">Fábrica Elétrica</a>
+            <a href="../Pages/MapaPontes.html">Pontes / Pórticos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
+          <div class="submenu">
+            <a href="../Pages/GestaoUsuarios.html">Usuários</a>
+            <a href="../Pages/GestaoPermissoes.html">Permissões</a>
+            <a href="../Pages/GestaoLocais.html">Locais / Setores</a>
+            <a href="../Pages/GestaoTipoManutencao.html">Tipos de Manutenção</a>
+            <a href="../Pages/GestaoCategoriaUsuario.html">Categorias de Usuário</a>
+            <a href="../Pages/GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+          <div class="submenu">
+            <a href="../Pages/RelatoriosExportacoes.html">Relatórios e Exportações</a>
+            <a href="../Pages/HistoricoAuditoria.html">Histórico e Auditoria</a>
+          </div>
+        </div>
+
+        <a href="../Pages/Perfil.html" class="active"><i data-lucide="user"></i> Meu Perfil</a>
+      </nav>
+
+      <div class="menu-inferior">
+        <hr />
+        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- CONTEÚDO -->
+  <main class="conteudo">
+    <h1>Meu Perfil</h1>
+    <p>Atualize seus dados pessoais e de contato. Algumas informações são bloqueadas por padrão.</p>
+
+    <section class="form-perfil">
+      <!-- FOTO DO PERFIL -->
+      <div class="perfil-foto">
+        <img id="fotoPerfil" src="../Images/avatar-default.png" alt="Foto do perfil" />
+        <div class="foto-acoes">
+          <input type="file" id="inputFoto" accept="image/*" hidden />
+          <button type="button" id="btnAlterarFoto" class="btn-outline">Alterar Foto</button>
+          <button type="button" id="btnRemoverFoto" class="btn-ghost">Remover</button>
+        </div>
+      </div>
+
+      <!-- FORMULÁRIO -->
+      <form id="formPerfil">
+        <fieldset>
+          <legend>Informações do Usuário</legend>
+
+          <label>Nome:
+            <input type="text" id="nome" value="Carlos A." disabled />
+          </label>
+
+          <label>Chapa:
+            <input type="text" id="chapa" value="1234567" disabled />
+          </label>
+
+          <label>Cargo / Função:
+            <input type="text" id="cargo" value="Operador de Máquina" disabled />
+          </label>
+
+          <label>E-mail:
+            <input type="email" id="email" value="carlos@empresa.com" />
+          </label>
+
+          <label>Telefone:
+            <input type="tel" id="telefone" value="(11) 98765-4321" />
+          </label>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">💾 Salvar Alterações</button>
+        </div>
+      </form>
+
+      <!-- ALTERAR SENHA -->
+      <form id="formSenha">
+        <fieldset>
+          <legend>Alterar Senha</legend>
+
+          <label>Nova Senha:
+            <input type="password" id="novaSenha" placeholder="Digite nova senha..." />
+          </label>
+
+          <label>Confirmar Nova Senha:
+            <input type="password" id="confirmarSenha" placeholder="Confirme a nova senha..." />
+          </label>
+        </fieldset>
+
+        <div class="form-actions">
+          <button type="button" class="btn-outline" id="btnAlterarSenha">🔒 Alterar Senha</button>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

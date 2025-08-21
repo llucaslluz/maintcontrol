@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
+  <title>Dashboard - Supervisor | MaintControl</title>
+  <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <link rel="stylesheet" href="../CSS/dashboardSupervisor.css" />
+    <link rel="stylesheet" href="../CSS/botaoEmergencia.css" />
+        <link rel="stylesheet" href="../CSS/loader.css" />
+    <script defer src="../JS/loader.js"></script>
+  <script defer src="../JS/botaoEmergencia.js"></script>
+  <script defer src="../JS/sidebar.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+      <!-- Loader personalizado VOITH -->
+<div id="voith-loader" class="voith-loader-overlay">
+  <div class="voith-loader-content">
+    <img src="../Images/rotor-voith.png" alt="Rotor" class="rotor-girando" />
+    <img src="../Images/Voith-sem-fundo.png" alt="VOITH" class="voith-logo" />
+  </div>
+</div>
+
+  <aside class="sidebar">
+    <div class="logo-box">
+      <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
+      <span class="logo-text">MaintControl</span>
+    </div>
+
+    <div class="menu-container">
+      <nav class="menu-superior">
+
+        <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
+          <div class="submenu">
+            <a href="../Pages/AbrirChamadoUsuario.html">Abrir Chamado</a>
+            <a href="../Pages/ListagemChamados.html">Lista de Chamados</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
+          <div class="submenu">
+            <a href="../Pages/Mapa.html">Mapas</a>
+            <a href="../Pages/MapaMaquinas.html">Máquinas</a>
+            <a href="../Pages/MapaCaldeiraria.html">Caldeiraria</a>
+            <a href="../Pages/MapaFabricaEletrica.html">Fábrica Elétrica</a>
+            <a href="../Pages/MapaPontes.html">Pontes / Pórticos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
+          <div class="submenu">
+            <a href="../Pages/GestaoUsuarios.html">Usuários</a>
+            <a href="../Pages/GestaoPermissoes.html">Permissões</a>
+            <a href="../Pages/GestaoLocais.html">Locais / Setores</a>
+            <a href="../Pages/GestaoTipoManutencao.html">Tipos de Manutenção</a>
+            <a href="../Pages/GestaoCategoriaUsuario.html">Categorias de Usuário</a>
+            <a href="../Pages/GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+          <div class="submenu">
+            <a href="../Pages/RelatoriosExportacoes.html">Relatórios e Exportações</a>
+            <a href="../Pages/HistoricoAuditoria.html">Histórico e Auditoria</a>
+          </div>
+        </div>
+
+        <a href="../Pages/Perfil.html"><i data-lucide="user"></i> Meu Perfil</a>
+      </nav>
+
+      <div class="menu-inferior">
+        <hr />
+        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+<main class="conteudo">
+  <h1>Dashboard do Supervisor / ADM</h1>
+  <p>Visão completa dos chamados, alterações recentes e atalhos de gestão.</p>
+
+<!-- 🔴 Botão de Emergência -->
+<button class="botao-emergencia" onclick="abrirModalEmergencia()">🚨 EMERGÊNCIA</button>
+
+<!-- 🔁 Modal de Emergência -->
+<div id="modal-emergencia" class="modal hidden">
+  <div class="modal-content">
+    <h2>🚨 Abrir Chamado de Emergência</h2>
+    <label for="local">Selecione o local:</label>
+    <select id="local-emergencia">
+      <option>Expedição</option>
+      <option>Montagem</option>
+      <option>Usinagem</option>
+    </select>
+    <div class="botoes-modal">
+      <button onclick="enviarEmergencia()">Confirmar</button>
+      <button onclick="fecharModalEmergencia()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+  <!-- 🔹 RESUMO -->
+  <section class="resumo-status">
+    <div class="card-status aberto">📂 Abertos<br><strong>5</strong></div>
+    <div class="card-status andamento">🔄 Em Andamento<br><strong>3</strong></div>
+    <div class="card-status concluido">✅ Concluídos<br><strong>10</strong></div>
+    <div class="card-status pendente">⚠️ Pendentes<br><strong>2</strong></div>
+  </section>
+
+  <!-- 🔹 FILTROS -->
+  <section class="filtros-dashboard">
+    <select><option>Status</option><option>Aberto</option><option>Em Andamento</option><option>Concluído</option><option>Com Pendência</option></select>
+    <select><option>Local</option><option>Expedição</option><option>Usinagem</option></select>
+    <select><option>Máquina</option><option>Prensa A1</option><option>Torno C3</option></select>
+    <select><option>Técnico</option><option>Lucas</option><option>Ana</option><option>João</option></select>
+    <select><option>Status da Máquina</option><option>Rodando</option><option>Parada</option><option>Manutenção</option></select>
+    <input type="date" />
+  </section>
+
+  <!-- 🔹 AÇÕES -->
+  <section class="acoes-rapidas">
+    <button onclick="window.location.href='../Pages/AbrirChamadoUsuario.html'">➕ Abrir Novo Chamado</button>
+    <button onclick="exportarTabela()">📥 Exportar Lista</button>
+    <button onclick="window.location.href='../Pages/Mapa.html'">🗺️ Ver Mapa da Planta</button>
+  </section>
+
+  <!-- 🔹 TABELA -->
+  <section class="lista-chamados">
+    <h2>Todos os Chamados</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Máquina</th>
+          <th>Status</th>
+          <th>Prioridade</th>
+          <th>Operador</th>
+          <th>Técnico</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="chamado-emergencia">
+  <td>#1234</td>
+  <td>Prensa A1</td>
+  <td>
+    Aberto <span class="tag-emergencia">🚨 Emergência</span>
+  </td>
+  <td>Alta</td>
+  <td>Carlos</td>
+  <td>—</td>
+  <td>
+    <button>Atender</button>
+    <button>Ver Detalhe</button>
+    <button>Exportar</button>
+  </td>
+</tr>
+
+        <tr>
+          <td>#1234</td>
+          <td>Prensa A1</td>
+          <td>Aberto</td>
+          <td>Alta</td>
+          <td>Carlos</td>
+          <td>—</td>
+          <td>
+            <button>Atender</button>
+            <button>Ver Detalhe</button>
+            <button>Exportar</button>
+          </td>
+        </tr>
+        <tr>
+          <td>#1235</td>
+          <td>Torno C3</td>
+          <td>Em Andamento</td>
+          <td>Média</td>
+          <td>Lucas</td>
+          <td>Ana</td>
+          <td>
+            <button>Finalizar</button>
+            <button>Mapa</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 🔹 ALTERAÇÕES RECENTES -->
+  <section class="alteracoes-recentes">
+    <h2>Máquinas com Alterações Recentes</h2>
+    <ul>
+      <li>Prensa A1 - Parada - Técnico João às 14:15</li>
+      <li>Ponte Rolante B - Em Manutenção - Supervisor Ana às 13:42</li>
+      <li>Caldeira X - Em Preparação - Operador Carlos às 13:30</li>
+    </ul>
+  </section>
+
+  <!-- 🔹 ATALHOS -->
+  <section class="atalhos-gestao">
+    <h2>Acessos Rápidos</h2>
+    <button onclick="location.href='../Pages/GestaoUsuarios.html'">👤 Gestão de Usuários</button>
+    <button onclick="location.href='../Pages/RelatoriosExportacoes.html'">📊 Relatórios</button>
+    <button onclick="location.href='../Pages/Mapa.html'">🗺️ Mapa da Planta</button>
+  </section>
+</main>
+
+
+<script>
+  lucide.createIcons();
+  function exportarTabela() {
+    alert('FAZER: exportação de relatórios em Excel ou PDF');
+  }
+</script>
+
+
+</body>
+</html>

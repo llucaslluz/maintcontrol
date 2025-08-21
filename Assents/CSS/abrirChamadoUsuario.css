@@ -1,0 +1,156 @@
+/* Reset e fonte padrão */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+}
+
+/* 🔶 Conteúdo principal */
+.conteudo {
+  flex: 1;
+  padding: 40px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  margin-bottom: 10px;
+  color: #2e4575;
+}
+
+/* 🔷 Formulário */
+.formulario-chamado {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  max-width: 700px;
+  margin: auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+form fieldset {
+  border: none;
+  margin-bottom: 30px;
+}
+
+form legend {
+  font-weight: bold;
+  font-size: 18px;
+  color: #2e4575;
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  font-size: 14px;
+  margin-bottom: 16px;
+  outline: none;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #5c7bd9;
+}
+
+/* Botão de envio */
+form button[type="submit"] {
+  width: 100%;
+  background-color: #2e4575;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+form button[type="submit"]:hover {
+  background-color: #1e2f50;
+}
+
+/* Botão personalizado de anexo */
+.botao-anexo {
+  background-color: #5c7bd9;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background-color 0.3s;
+}
+
+.botao-anexo:hover {
+  background-color: #3a5286;
+}
+
+/* Modal de anexo */
+.anexo-modal {
+  display: none;
+  background-color: #fff;
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+
+.anexo-modal.show {
+  display: block;
+}
+
+.anexo-modal h2 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #2e4575;
+}
+
+.anexo-modal p {
+  font-size: 13px;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.anexo-modal ul {
+  font-size: 14px;
+  margin-top: 8px;
+  color: #333;
+  padding-left: 18px;
+}
+
+.anexo-modal button {
+  background-color: #5c7bd9;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+  margin-top: 10px;
+}
+
+.anexo-modal button:hover {
+  background-color: #3a5286;
+}

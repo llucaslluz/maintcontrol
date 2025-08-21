@@ -1,0 +1,107 @@
+/* 🔷 Layout geral */
+.conteudo {
+  padding: 2rem;
+  margin-left: 240px;
+  max-width: 1000px;
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fc;
+}
+
+/* 🔷 Títulos */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin-bottom: 1.5rem;
+  color: #555;
+}
+
+/* 🔷 Filtros */
+.filtros fieldset {
+  border: 1px solid #ccc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.filtros legend {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtros label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.filtros input[type="text"],
+.filtros input[type="date"],
+.filtros select {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-top: 0.3rem;
+}
+
+/* 🔷 Botões */
+.botoes-acao {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-outline {
+  background-color: white;
+  color: #0077cc;
+  border: 1px solid #0077cc;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #005fa3;
+}
+
+.btn-outline:hover {
+  background-color: #e6f0ff;
+}
+
+/* 🔷 Tabela */
+.resultado {
+  margin-top: 2rem;
+}
+
+.tabela-auditoria {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tabela-auditoria th,
+.tabela-auditoria td {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.tabela-auditoria th {
+  background-color: #f0f4f8;
+}

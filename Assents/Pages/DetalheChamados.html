@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
+  <title>Detalhes do Chamado - MaintControl</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <link rel="stylesheet" href="../CSS/detalhesChamado.css" />
+  <link rel="stylesheet" href="../CSS/anexoModal.css" />
+
+  <!-- Scripts -->
+  <script defer src="../JS/sidebar.js"></script>
+  <script defer src="../JS/anexoModal.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- 🔷 SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-box">
+      <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
+      <span class="logo-text">MaintControl</span>
+    </div>
+
+    <div class="menu-container">
+      <nav class="menu-superior">
+        <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
+          <div class="submenu">
+            <a href="AbrirChamadoUsuario.html">Abrir Chamado</a>
+            <a href="ListagemChamados.html">Lista de Chamados</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
+          <div class="submenu">
+            <a href="Mapa.html">Mapas</a>
+            <a href="MapaMaquinas.html">Máquinas</a>
+            <a href="MapaCaldeiraria.html">Caldeiraria</a>
+            <a href="MapaFabricaEletrica.html">Fábrica Elétrica</a>
+            <a href="MapaPontes.html">Pontes / Pórticos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
+          <div class="submenu">
+            <a href="GestaoUsuarios.html">Usuários</a>
+            <a href="GestaoPermissoes.html">Permissões</a>
+            <a href="GestaoLocais.html">Locais / Setores</a>
+            <a href="GestaoTipoManutencao.html">Tipos de Manutenção</a>
+            <a href="GestaoCategoriaUsuario.html">Categorias de Usuário</a>
+            <a href="GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+          <div class="submenu">
+            <a href="RelatoriosExportacoes.html">Relatórios e Exportações</a>
+            <a href="HistoricoAuditoria.html">Histórico e Auditoria</a>
+          </div>
+        </div>
+
+        <a href="Perfil.html"><i data-lucide="user"></i> Meu Perfil</a>
+      </nav>
+
+      <div class="menu-inferior">
+        <hr />
+        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- 🔶 CONTEÚDO -->
+  <main class="conteudo">
+    <h1>Detalhes do Chamado #1234</h1>
+
+    <!-- 🔹 Informações principais -->
+    <div class="info-bloco">
+      <h2>Informações Gerais</h2>
+      <p><strong>Status:</strong> Em Andamento</p>
+      <p><strong>Máquina:</strong> Prensa A1</p>
+      <p><strong>Local:</strong> Usinagem</p>
+      <p><strong>Solicitante:</strong> Carlos Silva</p>
+      <p><strong>Data de Abertura:</strong> 10/07/2025 - 14:32</p>
+      <p><strong>Prioridade:</strong> Alta</p>
+      <p><strong>Descrição:</strong> Máquina travada ao iniciar o ciclo automático.</p>
+    </div>
+
+    <!-- 🔹 Histórico -->
+    <div class="info-bloco">
+      <h2>Histórico do Chamado</h2>
+      <ul class="historico">
+        <li>[10/07/2025 14:32] Chamado aberto por Carlos Silva</li>
+        <li>[10/07/2025 15:10] Técnico João iniciou o atendimento</li>
+        <li>[10/07/2025 15:30] Status alterado para "Em Andamento"</li>
+      </ul>
+    </div>
+
+    <!-- 🔹 Ações -->
+    <div class="info-bloco acoes-chamado">
+      <h2>Ações Disponíveis</h2>
+      <button onclick="abrirAnexo()">📎 Anexar Arquivo</button>
+      <button>✔️ Finalizar Chamado</button>
+      <button>⚠️ Criar Pendência</button>
+    </div>
+
+    <!-- 🔹 Modal de Anexo -->
+<div id="anexo" class="anexo-modal">
+  <h2>Anexar Arquivo</h2>
+  <p>Selecione um ou mais arquivos (máximo recomendado: 5 por vez).</p>
+
+  <!-- Input com multiple -->
+  <input type="file" id="arquivo" multiple accept="image/*,.pdf" onchange="mostrarNomeArquivos()" />
+
+  <!-- Lista dos arquivos selecionados -->
+  <ul id="lista-arquivos" style="font-size: 14px; margin-top: 8px; color: #333; padding-left: 18px;"></ul>
+
+  <br>
+  <button>
+    <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Enviar
+  </button>
+  <button onclick="fecharAnexo()">❌ Cancelar</button>
+</div>
+
+  </main>
+
+  <!-- Ícones lucide -->
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

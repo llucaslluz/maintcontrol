@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
+  <title>Gestão de Permissões - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoPermissoes.css" />
+  <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <script defer src="../JS/sidebar.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo-box">
+      <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
+      <span class="logo-text">MaintControl</span>
+    </div>
+
+    <div class="menu-container">
+      <nav class="menu-superior">
+
+        <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
+          <div class="submenu">
+            <a href="../Pages/AbrirChamadoUsuario.html">Abrir Chamado</a>
+            <a href="../Pages/ListagemChamados.html">Lista de Chamados</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
+          <div class="submenu">
+            <a href="../Pages/Mapa.html">Mapas</a>
+            <a href="../Pages/MapaMaquinas.html">Máquinas</a>
+            <a href="../Pages/MapaCaldeiraria.html">Caldeiraria</a>
+            <a href="../Pages/MapaFabricaEletrica.html">Fábrica Elétrica</a>
+            <a href="../Pages/MapaPontes.html">Pontes / Pórticos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
+          <div class="submenu">
+            <a href="../Pages/GestaoUsuarios.html">Usuários</a>
+            <a href="../Pages/GestaoPermissoes.html">Permissões</a>
+            <a href="../Pages/GestaoLocais.html">Locais / Setores</a>
+            <a href="../Pages/GestaoTipoManutencao.html">Tipos de Manutenção</a>
+            <a href="../Pages/GestaoCategoriaUsuario.html">Categorias de Usuário</a>
+            <a href="../Pages/GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
+          </div>
+        </div>
+
+        <div class="menu-dropdown">
+          <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
+          <div class="submenu">
+            <a href="../Pages/RelatoriosExportacoes.html">Relatórios e Exportações</a>
+            <a href="../Pages/HistoricoAuditoria.html">Histórico e Auditoria</a>
+          </div>
+        </div>
+
+        <a href="../Pages/Perfil.html"><i data-lucide="user"></i> Meu Perfil</a>
+      </nav>
+
+      <div class="menu-inferior">
+        <hr />
+        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+      </div>
+    </div>
+  </aside>
+
+<main class="conteudo">
+  <h1>Gestão de Permissões</h1>
+  <p>Defina e visualize as permissões atribuídas por categoria de usuário.</p>
+
+  <!-- 🔍 FILTROS -->
+  <section class="filtros-dashboard">
+    <select>
+      <option value="">Categoria</option>
+      <option>Operador</option>
+      <option>Técnico</option>
+      <option>Supervisor</option>
+      <option>ADM</option>
+    </select>
+    <button>🔎 Buscar Permissões</button>
+  </section>
+
+  <!-- 🎛️ AÇÕES RÁPIDAS -->
+  <section class="acoes-rapidas">
+    <button onclick="alert('Nova permissão')">➕ Nova Permissão</button>
+    <button onclick="alert('Exportar permissões')">📁 Exportar Lista</button>
+  </section>
+
+  <!-- 📄 TABELA -->
+  <section class="lista-permissoes">
+    <table>
+      <thead>
+        <tr>
+          <th>Permissão</th>
+          <th>Descrição</th>
+          <th>Atribuída</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>abrir_chamado</td>
+          <td>Permite ao usuário abrir chamados</td>
+          <td><span class="status ativo">✔️</span></td>
+          <td>
+            <button>Editar</button>
+            <button class="danger">Remover</button>
+          </td>
+        </tr>
+        <tr>
+          <td>ver_dashboard</td>
+          <td>Acesso ao painel principal</td>
+          <td><span class="status inativo">❌</span></td>
+          <td>
+            <button>Editar</button>
+            <button class="danger">Remover</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
+
+  <script>
+    lucide.createIcons();
+  </script>
+
+</body>
+</html>

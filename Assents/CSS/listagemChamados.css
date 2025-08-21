@@ -1,0 +1,101 @@
+/* Estilo específico para a página de listagem de chamados */
+
+.conteudo {
+  flex: 1;
+  padding: 40px;
+  background-color: #f5f5f5;
+}
+
+h1 {
+  margin-bottom: 10px;
+  color: #2e4575;
+}
+
+.filtros {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.filtros label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #333;
+}
+
+.filtros select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1.5px solid #ccc;
+  min-width: 150px;
+  font-size: 14px;
+}
+
+.lista-chamados table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+.lista-chamados th, .lista-chamados td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.lista-chamados th {
+  background-color: #3a5286;
+  color: white;
+}
+
+.lista-chamados tr:hover {
+  background-color: #f0f4ff;
+}
+
+.status {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.status.aberto {
+  background-color: #ff9800;
+}
+.status.andamento {
+  background-color: #2196f3;
+}
+.status.concluido {
+  background-color: #4caf50;
+}
+.status.pendente {
+  background-color: #9c27b0;
+}
+
+button.btn-detalhe,
+button.btn-acao {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 5px;
+  background-color: #5c7bd9;
+  color: white;
+  transition: background-color 0.3s;
+}
+
+button.btn-acao:hover,
+button.btn-detalhe:hover {
+  background-color: #3a5286;
+}

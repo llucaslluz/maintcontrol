@@ -1,0 +1,41 @@
+.mapa-container {
+  position: relative;
+  max-width: 100%;
+  margin-top: 20px;
+  overflow: hidden;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+}
+
+.mapa-container img.mapa-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hotspot {
+  position: absolute;
+  padding: 6px 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  font-size: 12px;
+  border-radius: 6px;
+  text-align: center;
+  text-decoration: none;
+  transform: translate(-50%, -50%);
+  transition: background-color 0.3s ease;
+  z-index: 10;
+}
+
+.hotspot:hover {
+  background-color: rgba(0, 0, 0, 0.85);
+}
+
+.legenda {
+  margin-top: 20px;
+  font-size: 14px;
+  background: #f1f1f1;
+  padding: 10px;
+  border-radius: 6px;
+  width: fit-content;
+}

@@ -1,0 +1,47 @@
+/* 🔲 Fundo branco em tela cheia */
+.voith-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+
+/* Ocultar suavemente */
+.voith-loader-overlay.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* 🔳 Container central */
+.voith-loader-content {
+  display: flex;
+  flex-direction: column;       /* Coloca o rotor em cima e o logo embaixo */
+  align-items: center;          /* Centraliza horizontalmente */
+  justify-content: center;      /* Garante alinhamento vertical se necessário */
+}
+
+/* 🔄 Rotor girando */
+.rotor-girando {
+  width: 100px;
+  height: 100px;
+  animation: girar 1.5s linear infinite;
+  margin-bottom: 20px;
+}
+
+/* 🌀 Animação de rotação */
+@keyframes girar {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 🖼️ Logo VOITH abaixo */
+.voith-logo {
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
