@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (chapa === '1234567' && senha === '12345678900') {
             alert('✅ Login realizado com sucesso!');
             // redireciona para o dashboard
-            window.location.href = "../Pages/Dashboard.html";
+            window.location.href = "/DashboardSupervisorAdm.html";
         } else {
             alert('❌ Chapa ou senha inválidos. Tente novamente.');
         }
