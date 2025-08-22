@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const senha = document.getElementById('senha').value.trim();
 
         // Simulação de verificação
-        if (chapa === '1234567' && senha === '12345678900') {
+        if (chapa === 'Andre' && senha === 'Morais') {
             alert('✅ Login realizado com sucesso!');
             // redireciona para o dashboard
             window.location.href = "/DashboardSupervisorAdm.html";
