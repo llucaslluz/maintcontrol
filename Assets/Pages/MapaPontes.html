@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Categorias de Usuário - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoCategoriasUsuario.css">
+  <title>Mapa - Pontes e Pórticos</title>
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -67,76 +66,17 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-<main class="conteudo">
-  <h1>Gestão de Categorias de Usuário</h1>
-  <p>Visualize, adicione ou edite categorias que definem perfis e permissões do sistema.</p>
+    <main class="conteudo">
 
-  <!-- 🔍 FILTROS -->
-  <section class="filtros-dashboard">
-    <input type="text" placeholder="Buscar por nome da categoria..." />
-    <button>🔎 Buscar</button>
-  </section>
+    <h1>Mapa - Pontes e Pórticos</h1>
+    <p>Mapa das pontes rolantes, talhas e pórticos, com suas posições fixas e status atualizados.</p>
 
-  <!-- 🎛️ AÇÕES RÁPIDAS -->
-  <section class="acoes-rapidas">
-    <button onclick="alert('Nova categoria')">➕ Adicionar Nova Categoria</button>
-    <button onclick="alert('Exportar categorias')">📁 Exportar Lista</button>
-  </section>
-
-  <!-- 📄 TABELA -->
-  <section class="lista-categorias">
-    <table>
-      <thead>
-        <tr>
-          <th>Categoria</th>
-          <th>Descrição</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Operador</td>
-          <td>Usuário com permissão para abrir e visualizar próprios chamados</td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Técnico</td>
-          <td>Responsável por atendimentos técnicos e conclusão de chamados</td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Supervisor</td>
-          <td>Gerencia equipe técnica, usuários e locais/setores</td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>ADM</td>
-          <td>Administrador com acesso total ao sistema</td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-</main>
-
-  </main>
+    </main>
 
   <script>
     lucide.createIcons();

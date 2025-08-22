@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Mapa - Pontes e Pórticos</title>
+  <title>Gestão de Tipos de Manutenção - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoTipoManutencao.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -66,17 +67,75 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-    <main class="conteudo">
+<main class="conteudo">
+  <h1>Gestão de Tipos de Manutenção</h1>
+  <p>Gerencie os tipos de manutenção utilizados nos chamados.</p>
 
-    <h1>Mapa - Pontes e Pórticos</h1>
-    <p>Mapa das pontes rolantes, talhas e pórticos, com suas posições fixas e status atualizados.</p>
+  <!-- 🔍 FILTROS -->
+  <section class="filtros-dashboard">
+    <input type="text" placeholder="🔍 Nome do Tipo..." />
+    <select>
+      <option>Status</option>
+      <option>Ativo</option>
+      <option>Inativo</option>
+    </select>
+  </section>
 
-    </main>
+  <!-- 🎛️ AÇÕES RÁPIDAS -->
+  <section class="acoes-rapidas">
+    <button onclick="alert('Abrir cadastro de tipo')">➕ Adicionar Novo Tipo</button>
+    <button onclick="alert('Exportar tipos')">📁 Exportar Lista</button>
+  </section>
+
+  <!-- 📄 TABELA -->
+  <section class="lista-tipos">
+    <table>
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Descrição</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Corretiva</td>
+          <td>Correção de falha não prevista</td>
+          <td><span class="status ativo">Ativo</span></td>
+          <td>
+            <button>Editar</button>
+            <button class="danger">Excluir</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Preventiva</td>
+          <td>Ações para prevenir falha futura</td>
+          <td><span class="status ativo">Ativo</span></td>
+          <td>
+            <button>Editar</button>
+            <button class="danger">Excluir</button>
+          </td>
+        </tr>
+        <tr>
+          <td>Preditiva</td>
+          <td>Monitoramento para prever falhas</td>
+          <td><span class="status ativo">Ativo</span></td>
+          <td>
+            <button>Editar</button>
+            <button class="danger">Excluir</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+
 
   <script>
     lucide.createIcons();

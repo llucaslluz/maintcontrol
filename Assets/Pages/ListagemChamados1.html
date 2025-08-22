@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Máquinas e Dispositivos - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoMaquinasDispositivos.css" />
+  <title>Listagem de Chamados - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/listagemChamados1.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -13,6 +13,7 @@
 <body>
 
   <aside class="sidebar">
+    <!-- Sidebar (mesmo padrão de sempre) -->
     <div class="logo-box">
       <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
       <span class="logo-text">MaintControl</span>
@@ -20,9 +21,7 @@
 
     <div class="menu-container">
       <nav class="menu-superior">
-
         <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
-
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
           <div class="submenu">
@@ -30,7 +29,6 @@
             <a href="../Pages/ListagemChamados.html">Lista de Chamados</a>
           </div>
         </div>
-
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
           <div class="submenu">
@@ -41,7 +39,6 @@
             <a href="../Pages/MapaPontes.html">Pontes / Pórticos</a>
           </div>
         </div>
-
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
           <div class="submenu">
@@ -53,7 +50,6 @@
             <a href="../Pages/GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
           </div>
         </div>
-
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
           <div class="submenu">
@@ -61,84 +57,91 @@
             <a href="../Pages/HistoricoAuditoria.html">Histórico e Auditoria</a>
           </div>
         </div>
-
         <a href="../Pages/Perfil.html"><i data-lucide="user"></i> Meu Perfil</a>
       </nav>
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-<main class="conteudo">
-  <h1>Gestão de Máquinas e Dispositivos</h1>
-  <p>Gerencie os equipamentos cadastrados, associando local, status, série e modelo.</p>
+  <main class="conteudo">
+    <h1>Lista de Chamados</h1>
+    <p>Visualize, filtre e gerencie todos os chamados registrados no sistema.</p>
 
-  <!-- 🔍 FILTROS -->
-  <section class="filtros-dashboard">
-    <input type="text" placeholder="🔍 Nome da Máquina..." />
-    <select>
-      <option>Local</option>
-      <option>Expedição</option>
-      <option>Usinagem</option>
-      <option>Montagem</option>
-    </select>
-    <select>
-      <option>Status</option>
-      <option>Ativo</option>
-      <option>Inativo</option>
-    </select>
-  </section>
+    <section class="filtros">
+      <form>
+        <label>ID: <input type="text" placeholder="#0000" /></label>
+        <label>Status:
+          <select>
+            <option value="">Todos</option>
+            <option>Aberto</option>
+            <option>Em Andamento</option>
+            <option>Concluído</option>
+            <option>Com Pendência</option>
+          </select>
+        </label>
+        <label>Prioridade:
+          <select>
+            <option value="">Todas</option>
+            <option>Alta</option>
+            <option>Média</option>
+            <option>Baixa</option>
+          </select>
+        </label>
+        <label>Local:
+          <input type="text" placeholder="Ex: Usinagem" />
+        </label>
+        <label>Máquina:
+          <input type="text" placeholder="Ex: Prensa A1" />
+        </label>
+        <label>Técnico:
+          <input type="text" placeholder="Nome do Técnico" />
+        </label>
+        <button type="submit">🔎 Filtrar</button>
+      </form>
+    </section>
 
-  <!-- 🎛️ AÇÕES RÁPIDAS -->
-  <section class="acoes-rapidas">
-    <button onclick="alert('Abrir cadastro de máquina')">➕ Adicionar Nova Máquina</button>
-    <button onclick="alert('Exportar máquinas')">📁 Exportar Lista</button>
-  </section>
+    <section class="lista-chamados">
+      <button>➕ Abrir Novo Chamado</button>
+      <button>⬇️ Exportar Lista</button>
 
-  <!-- 📄 TABELA -->
-  <section class="lista-maquinas">
-    <table>
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Local</th>
-          <th>Nº Série</th>
-          <th>Modelo</th>
-          <th>Status</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Prensa A1</td>
-          <td>Expedição</td>
-          <td>001-A</td>
-          <td>P-300</td>
-          <td><span class="status ativo">Ativo</span></td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Torno T2</td>
-          <td>Almoxarifado</td>
-          <td>887-B</td>
-          <td>T-50</td>
-          <td><span class="status ativo">Ativo</span></td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
-</main>
-
+      <table border="1" cellpadding="6" cellspacing="0" style="margin-top: 15px;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Local</th>
+            <th>Máquina</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Técnico</th>
+            <th>Abertura</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#1240</td>
+            <td>Usinagem</td>
+            <td>Prensa A1</td>
+            <td>Aberto</td>
+            <td>Alta</td>
+            <td>—</td>
+            <td>01/08/2025</td>
+            <td>
+                <!-- 🔗 Botão para abrir detalhes do chamado -->
+                <a href="DetalhesChamado.html?id=1234">
+                <button>Ver Detalhe</button>
+            </a>
+            </td>
+          </tr>
+          <!-- Outras linhas... -->
+        </tbody>
+      </table>
+    </section>
+  </main>
 
   <script>
     lucide.createIcons();

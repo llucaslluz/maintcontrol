@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Dashboard - MaintControl</title>
+  <title>Histórico e Auditoria - MaintControl</title>
+  <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png" />
+  
+  <!-- Estilos -->
   <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <link rel="stylesheet" href="../CSS/historiocoAuditoria.css" />
+
+  <!-- Scripts -->
   <script defer src="../JS/sidebar.js"></script>
+  <script defer src="../JS/historicoAuditoria.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -66,19 +72,85 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
+ <!-- 🔷 CONTEÚDO -->
   <main class="conteudo">
-    <h1>Dashboard</h1>
-    <p>Conteúdo da página aqui.</p>
+    <h1>Histórico e Auditoria</h1>
+    <p>Consulte as ações realizadas no sistema pelos usuários. Use os filtros abaixo para refinar sua busca.</p>
+
+    <!-- 🔹 FILTROS -->
+    <section class="filtros">
+      <form id="formAuditoria">
+        <fieldset>
+          <legend>Filtros Avançados</legend>
+
+          <label>Data:
+            <input type="date" id="filtroData" />
+          </label>
+
+          <label>Usuário:
+            <input type="text" id="filtroUsuario" placeholder="Nome ou chapa..." />
+          </label>
+
+          <label>Ação:
+            <select id="filtroAcao">
+              <option value="">Todas</option>
+              <option value="abertura">Abertura</option>
+              <option value="atendimento">Atendimento</option>
+              <option value="alteracao">Alteração de Status</option>
+              <option value="finalizacao">Finalização</option>
+              <option value="anexo">Upload de Anexo</option>
+            </select>
+          </label>
+
+          <label>Chamado:
+            <input type="text" id="filtroChamado" placeholder="ID do chamado..." />
+          </label>
+
+          <div class="botoes-acao">
+            <button type="submit" class="btn-primary">🔍 Buscar</button>
+            <button type="button" id="btnExportarAuditoria" class="btn-outline">⬇️ Exportar Resultado</button>
+          </div>
+        </fieldset>
+      </form>
+    </section>
+
+    <!-- 🔹 TABELA -->
+    <section class="resultado">
+      <h2>Registros de Ações</h2>
+      <table class="tabela-auditoria">
+        <thead>
+          <tr>
+            <th>Data/Hora</th>
+            <th>Usuário</th>
+            <th>Ação</th>
+            <th>Descrição</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaCorpo">
+          <tr>
+            <td>11/07/2025 14:10</td>
+            <td>Carlos A. (Operador)</td>
+            <td>Abertura</td>
+            <td>Chamado #1234 aberto</td>
+          </tr>
+          <tr>
+            <td>11/07/2025 15:32</td>
+            <td>João S. (Técnico)</td>
+            <td>Atendimento</td>
+            <td>Chamado #1234 em andamento</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </main>
 
   <script>
     lucide.createIcons();
   </script>
-
 </body>
 </html>

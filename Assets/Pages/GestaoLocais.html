@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Tipos de Manutenção - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoTipoManutencao.css" />
+  <title>Gestão de Locais - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoLocais.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -67,18 +67,18 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-<main class="conteudo">
-  <h1>Gestão de Tipos de Manutenção</h1>
-  <p>Gerencie os tipos de manutenção utilizados nos chamados.</p>
+ <main class="conteudo">
+  <h1>Gestão de Locais / Setores</h1>
+  <p>Cadastre e gerencie os locais físicos da fábrica onde os equipamentos estão distribuídos.</p>
 
   <!-- 🔍 FILTROS -->
   <section class="filtros-dashboard">
-    <input type="text" placeholder="🔍 Nome do Tipo..." />
+    <input type="text" placeholder="🔍 Nome do Local..." />
     <select>
       <option>Status</option>
       <option>Ativo</option>
@@ -88,16 +88,16 @@
 
   <!-- 🎛️ AÇÕES RÁPIDAS -->
   <section class="acoes-rapidas">
-    <button onclick="alert('Abrir cadastro de tipo')">➕ Adicionar Novo Tipo</button>
-    <button onclick="alert('Exportar tipos')">📁 Exportar Lista</button>
+    <button onclick="alert('Abrir cadastro de novo local')">➕ Adicionar Novo Local</button>
+    <button onclick="alert('Exportar locais')">📁 Exportar Lista</button>
   </section>
 
   <!-- 📄 TABELA -->
-  <section class="lista-tipos">
+  <section class="lista-locais">
     <table>
       <thead>
         <tr>
-          <th>Tipo</th>
+          <th>Local</th>
           <th>Descrição</th>
           <th>Status</th>
           <th>Ações</th>
@@ -105,8 +105,8 @@
       </thead>
       <tbody>
         <tr>
-          <td>Corretiva</td>
-          <td>Correção de falha não prevista</td>
+          <td>Expedição</td>
+          <td>Área de carregamento e despacho</td>
           <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>
@@ -114,17 +114,8 @@
           </td>
         </tr>
         <tr>
-          <td>Preventiva</td>
-          <td>Ações para prevenir falha futura</td>
-          <td><span class="status ativo">Ativo</span></td>
-          <td>
-            <button>Editar</button>
-            <button class="danger">Excluir</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Preditiva</td>
-          <td>Monitoramento para prever falhas</td>
+          <td>Almoxarifado</td>
+          <td>Estoque de peças e insumos</td>
           <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>

@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Locais - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoLocais.css" />
+  <title>Gestão de Permissões - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoPermissoes.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -67,59 +67,61 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
- <main class="conteudo">
-  <h1>Gestão de Locais / Setores</h1>
-  <p>Cadastre e gerencie os locais físicos da fábrica onde os equipamentos estão distribuídos.</p>
+<main class="conteudo">
+  <h1>Gestão de Permissões</h1>
+  <p>Defina e visualize as permissões atribuídas por categoria de usuário.</p>
 
   <!-- 🔍 FILTROS -->
   <section class="filtros-dashboard">
-    <input type="text" placeholder="🔍 Nome do Local..." />
     <select>
-      <option>Status</option>
-      <option>Ativo</option>
-      <option>Inativo</option>
+      <option value="">Categoria</option>
+      <option>Operador</option>
+      <option>Técnico</option>
+      <option>Supervisor</option>
+      <option>ADM</option>
     </select>
+    <button>🔎 Buscar Permissões</button>
   </section>
 
   <!-- 🎛️ AÇÕES RÁPIDAS -->
   <section class="acoes-rapidas">
-    <button onclick="alert('Abrir cadastro de novo local')">➕ Adicionar Novo Local</button>
-    <button onclick="alert('Exportar locais')">📁 Exportar Lista</button>
+    <button onclick="alert('Nova permissão')">➕ Nova Permissão</button>
+    <button onclick="alert('Exportar permissões')">📁 Exportar Lista</button>
   </section>
 
   <!-- 📄 TABELA -->
-  <section class="lista-locais">
+  <section class="lista-permissoes">
     <table>
       <thead>
         <tr>
-          <th>Local</th>
+          <th>Permissão</th>
           <th>Descrição</th>
-          <th>Status</th>
+          <th>Atribuída</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>Expedição</td>
-          <td>Área de carregamento e despacho</td>
-          <td><span class="status ativo">Ativo</span></td>
+          <td>abrir_chamado</td>
+          <td>Permite ao usuário abrir chamados</td>
+          <td><span class="status ativo">✔️</span></td>
           <td>
             <button>Editar</button>
-            <button class="danger">Excluir</button>
+            <button class="danger">Remover</button>
           </td>
         </tr>
         <tr>
-          <td>Almoxarifado</td>
-          <td>Estoque de peças e insumos</td>
-          <td><span class="status ativo">Ativo</span></td>
+          <td>ver_dashboard</td>
+          <td>Acesso ao painel principal</td>
+          <td><span class="status inativo">❌</span></td>
           <td>
             <button>Editar</button>
-            <button class="danger">Excluir</button>
+            <button class="danger">Remover</button>
           </td>
         </tr>
       </tbody>

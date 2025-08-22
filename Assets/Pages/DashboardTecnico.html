@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Dashboard - Operacional | MaintControl</title>
-  <link rel="stylesheet" href="../CSS/dashboardOperacional.css" />
+  <title>Dashboard - Técnico | MaintControl</title>
   <link rel="stylesheet" href="../CSS/sidebar.css" />
+  <link rel="stylesheet" href="../CSS/dashboardTecnico.css" />
     <link rel="stylesheet" href="../CSS/botaoEmergencia.css" />
         <link rel="stylesheet" href="../CSS/loader.css" />
     <script defer src="../JS/loader.js"></script>
@@ -15,8 +15,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-
-      <!-- Loader personalizado VOITH -->
+    <!-- Loader personalizado VOITH -->
 <div id="voith-loader" class="voith-loader-overlay">
   <div class="voith-loader-content">
     <img src="../Images/rotor-voith.png" alt="Rotor" class="rotor-girando" />
@@ -79,16 +78,16 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-<main class="conteudo">
-  <h1>Dashboard Operacional</h1>
-  <p>Visualize os chamados do seu setor e o status das máquinas em tempo real.</p>
+  <main class="conteudo">
+  <h1>Dashboard do Técnico</h1>
+  <p>Visualize todos os chamados abertos e em andamento para iniciar, acompanhar ou finalizar atendimentos.</p>
 
-  <!-- 🔴 Botão de Emergência -->
+<!-- 🔴 Botão de Emergência -->
 <button class="botao-emergencia" onclick="abrirModalEmergencia()">🚨 EMERGÊNCIA</button>
 
 <!-- 🔁 Modal de Emergência -->
@@ -110,27 +109,49 @@
 
   <!-- 🔹 VISÃO GERAL -->
   <section class="resumo-status">
-    <div class="card-status aberto">📂 Abertos<br><strong>2</strong></div>
-    <div class="card-status andamento">🔄 Em Andamento<br><strong>1</strong></div>
+    <div class="card-status aberto">📂 Abertos<br><strong>4</strong></div>
+    <div class="card-status andamento">🔄 Em Andamento<br><strong>2</strong></div>
+    <div class="card-status concluido">✅ Concluídos<br><strong>8</strong></div>
+    <div class="card-status pendente">⚠️ Pendentes<br><strong>1</strong></div>
   </section>
 
   <!-- 🔹 FILTROS -->
   <section class="filtros-dashboard">
-    <select><option>Status</option><option>Aberto</option><option>Em Andamento</option></select>
-    <select><option>Local</option><option>Expedição</option><option>Montagem</option></select>
-    <select><option>Máquina</option><option>Prensa A1</option><option>Torno C3</option></select>
-    <select><option>Status da Máquina</option><option>Rodando</option><option>Parada</option><option>Manutenção</option></select>
+    <select>
+      <option>Status</option>
+      <option>Aberto</option>
+      <option>Em Andamento</option>
+      <option>Concluído</option>
+      <option>Com Pendência</option>
+    </select>
+    <select>
+      <option>Local</option>
+      <option>Expedição</option>
+      <option>Usinagem</option>
+    </select>
+    <select>
+      <option>Máquina</option>
+      <option>Prensa A1</option>
+      <option>Torno C3</option>
+    </select>
+    <select>
+      <option>Técnico</option>
+      <option>Lucas</option>
+      <option>Ana</option>
+      <option>João</option>
+    </select>
+    <input type="date" />
   </section>
 
-  <!-- 🔹 AÇÕES -->
+  <!-- 🔹 AÇÕES RÁPIDAS -->
   <section class="acoes-rapidas">
-    <button onclick="window.location.href='../Pages/AbrirChamadoUsuario.html'">➕ Abrir Chamado</button>
-    <button onclick="window.location.href='../Pages/Mapa.html'">🗺️ Ver Mapa da Planta</button>
+    <button onclick="window.location.href='../Pages/AbrirChamadoUsuario.html'">➕ Abrir Novo Chamado</button>
+    <button onclick="exportarTabela()">📥 Exportar Lista</button>
   </section>
 
-  <!-- 🔹 LISTA DE CHAMADOS -->
+  <!-- 🔹 TABELA -->
   <section class="lista-chamados">
-    <h2>Chamados do Local</h2>
+    <h2>Chamados Ativos</h2>
     <table>
       <thead>
         <tr>
@@ -138,42 +159,47 @@
           <th>Máquina</th>
           <th>Status</th>
           <th>Prioridade</th>
+          <th>Técnico</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>#1240</td>
+          <td>#1235</td>
           <td>Prensa A1</td>
           <td>Aberto</td>
           <td>Alta</td>
-          <td><button>Ver Detalhe</button></td>
+          <td>—</td>
+          <td>
+            <button>Atender</button>
+            <button>Ver Detalhe</button>
+          </td>
         </tr>
         <tr>
-          <td>#1241</td>
+          <td>#1236</td>
           <td>Torno C3</td>
           <td>Em Andamento</td>
           <td>Média</td>
-          <td><button>Ver Detalhe</button></td>
+          <td>Lucas</td>
+          <td>
+            <button>Finalizar</button>
+            <button>Adicionar Anexo</button>
+          </td>
         </tr>
       </tbody>
     </table>
   </section>
-
-  <!-- 🔹 MÁQUINAS COM ALTERAÇÕES RECENTES -->
-  <section class="alteracoes-recentes">
-    <h2>Máquinas com Alterações Recentes</h2>
-    <ul>
-      <li>Prensa A1 - Parada - por Técnico João às 14:15</li>
-      <li>Ponte C2 - Produção - por Operador Lucas às 14:00</li>
-    </ul>
-  </section>
 </main>
 
 
-  <script>
-    lucide.createIcons();
-  </script>
+<script>
+  lucide.createIcons();
+
+  function exportarTabela() {
+    alert('FAZER Função de exportação.');
+  }
+</script>
+
 
 </body>
 </html>

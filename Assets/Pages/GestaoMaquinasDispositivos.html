@@ -4,14 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Usuários - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoUsuarios.css" />
+  <title>Gestão de Máquinas e Dispositivos - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoMaquinasDispositivos.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-
 
   <aside class="sidebar">
     <div class="logo-box">
@@ -68,25 +67,23 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
- <main class="conteudo">
-  <h1>Gestão de Usuários</h1>
-  <p>Crie, edite ou remova usuários do sistema. Acesso restrito a Supervisores e Administradores.</p>
+<main class="conteudo">
+  <h1>Gestão de Máquinas e Dispositivos</h1>
+  <p>Gerencie os equipamentos cadastrados, associando local, status, série e modelo.</p>
 
   <!-- 🔍 FILTROS -->
   <section class="filtros-dashboard">
-    <input type="text" placeholder="🔍 Nome..." />
-    <input type="text" placeholder="🔍 Chapa..." />
+    <input type="text" placeholder="🔍 Nome da Máquina..." />
     <select>
-      <option>Categoria</option>
-      <option>Operador</option>
-      <option>Técnico</option>
-      <option>Supervisor</option>
-      <option>ADM</option>
+      <option>Local</option>
+      <option>Expedição</option>
+      <option>Usinagem</option>
+      <option>Montagem</option>
     </select>
     <select>
       <option>Status</option>
@@ -97,27 +94,29 @@
 
   <!-- 🎛️ AÇÕES RÁPIDAS -->
   <section class="acoes-rapidas">
-    <button onclick="alert('Abrir formulário de cadastro')">➕ Adicionar Novo Usuário</button>
-    <button onclick="alert('Exportar usuários')">📁 Exportar Lista</button>
+    <button onclick="alert('Abrir cadastro de máquina')">➕ Adicionar Nova Máquina</button>
+    <button onclick="alert('Exportar máquinas')">📁 Exportar Lista</button>
   </section>
 
-  <!-- 📄 LISTA DE USUÁRIOS -->
-  <section class="lista-usuarios">
+  <!-- 📄 TABELA -->
+  <section class="lista-maquinas">
     <table>
       <thead>
         <tr>
           <th>Nome</th>
-          <th>Chapa</th>
-          <th>Categoria</th>
+          <th>Local</th>
+          <th>Nº Série</th>
+          <th>Modelo</th>
           <th>Status</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>Carlos Alberto</td>
-          <td>1234567</td>
-          <td>Operador</td>
+          <td>Prensa A1</td>
+          <td>Expedição</td>
+          <td>001-A</td>
+          <td>P-300</td>
           <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>
@@ -125,16 +124,16 @@
           </td>
         </tr>
         <tr>
-          <td>Ana Beatriz</td>
-          <td>2345678</td>
-          <td>Técnico</td>
+          <td>Torno T2</td>
+          <td>Almoxarifado</td>
+          <td>887-B</td>
+          <td>T-50</td>
           <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>
             <button class="danger">Excluir</button>
           </td>
         </tr>
-        <!-- ... -->
       </tbody>
     </table>
   </section>

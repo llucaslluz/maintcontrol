@@ -3,29 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lista de Chamados - MaintControl</title>
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Abrir Chamado - MaintControl</title>
 
   <!-- Estilos -->
   <link rel="stylesheet" href="../CSS/sidebar.css" />
-  <link rel="stylesheet" href="../CSS/abrirChamadoUsuario.css" />
+  <link rel="stylesheet" href="../CSS/listagemChamados.css" />
 
   <!-- Scripts -->
   <script defer src="../JS/sidebar.js"></script>
-  <script defer src="../JS/abrirChamadoUsuario.js"></script>
+  <script defer src="../JS/listagemChamados.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
-  <!-- 🔷 SIDEBAR -->
+  <!-- 🔷 SIDEBAR PADRÃO -->
   <aside class="sidebar">
     <div class="logo-box">
       <img src="../Images/Voith-sem-fundo.png" alt="Logo" class="logo-img" />
       <span class="logo-text">MaintControl</span>
     </div>
+
     <div class="menu-container">
       <nav class="menu-superior">
         <a href="dashboard.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
           <div class="submenu">
@@ -33,6 +35,7 @@
             <a href="ListagemChamados.html">Lista de Chamados</a>
           </div>
         </div>
+
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="map"></i> Mapas</div>
           <div class="submenu">
@@ -43,6 +46,7 @@
             <a href="MapaPontes.html">Pontes / Pórticos</a>
           </div>
         </div>
+
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="settings"></i> Gestão</div>
           <div class="submenu">
@@ -54,6 +58,7 @@
             <a href="GestaoMaquinasDispositivos.html">Máquinas e Dispositivos</a>
           </div>
         </div>
+
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="bar-chart-2"></i> Relatórios</div>
           <div class="submenu">
@@ -61,97 +66,99 @@
             <a href="HistoricoAuditoria.html">Histórico e Auditoria</a>
           </div>
         </div>
+
         <a href="Perfil.html"><i data-lucide="user"></i> Meu Perfil</a>
       </nav>
+
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
   <!-- 🔶 CONTEÚDO PRINCIPAL -->
   <main class="conteudo">
-    <h1>Abertura de Chamado</h1>
+    <h1>Lista de Chamados</h1>
+    <p>Consulte e filtre os chamados de manutenção cadastrados no sistema.</p>
 
-    <form id="formChamado" class="formulario-chamado">
-      <fieldset>
-        <legend>Identificação</legend>
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" value="Carlos A." disabled>
+    <!-- 🔍 Filtros -->
+    <section class="filtros">
+      <label>Status:
+        <select>
+          <option value="">Todos</option>
+          <option value="aberto">Aberto</option>
+          <option value="andamento">Em Andamento</option>
+          <option value="concluido">Concluído</option>
+          <option value="pendente">Com Pendência</option>
+        </select>
+      </label>
 
-        <label for="chapa">Chapa:</label>
-        <input type="text" id="chapa" value="1234567" disabled>
-
-        <label for="funcao">Função:</label>
-        <input type="text" id="funcao" value="Operador de Máquina" disabled>
-      </fieldset>
-
-      <fieldset>
-        <legend>Detalhes do Chamado</legend>
-
-        <label for="local">Local:</label>
-        <select id="local" required>
-          <option value="">Selecione</option>
+      <label>Local:
+        <select>
+          <option value="">Todos</option>
           <option value="expedicao">Expedição</option>
           <option value="almoxarifado">Almoxarifado</option>
         </select>
+      </label>
 
-        <label for="maquina">Máquina:</label>
-        <select id="maquina" required>
-          <option value="">Selecione</option>
+      <label>Máquina:
+        <select>
+          <option value="">Todas</option>
           <option value="prensa-a1">Prensa A1</option>
           <option value="torno-c3">Torno C3</option>
         </select>
+      </label>
 
-        <label for="tipo">Tipo de Manutenção:</label>
-        <select id="tipo" required>
-          <option value="corretiva">Corretiva</option>
-          <option value="preventiva">Preventiva</option>
-          <option value="preditiva">Preditiva</option>
-        </select>
-
-        <label for="status">Status da Máquina:</label>
-        <select id="status" required>
-          <option value="parada">Parada</option>
-          <option value="rodando">Em Produção</option>
-          <option value="preparacao">Em Preparação</option>
-          <option value="manutencao">Em Manutenção</option>
-        </select>
-
-        <label for="prioridade">Prioridade:</label>
-        <select id="prioridade" required>
+      <label>Prioridade:
+        <select>
+          <option value="">Todas</option>
           <option value="alta">Alta</option>
           <option value="media">Média</option>
           <option value="baixa">Baixa</option>
         </select>
+      </label>
+    </section>
 
-        <label for="descricao">Descrição do Problema:</label>
-        <textarea id="descricao" rows="4" required placeholder="Descreva o problema..."></textarea>
-
-        <!-- Botão de Anexo -->
-        <button type="button" id="botao-anexo" class="botao-anexo" onclick="abrirAnexo()">
-          <i data-lucide="paperclip" style="width: 16px; height: 16px;"></i> Anexar Arquivos
-        </button>
-
-        <!-- Modal de Anexo -->
-        <div id="anexo" class="anexo-modal">
-          <h2>Anexar Arquivos</h2>
-          <p>Selecione um ou mais arquivos (imagens, PDF, vídeos).</p>
-
-          <input type="file" id="arquivo" multiple accept="image/*,.pdf,.mp4" onchange="mostrarNomeArquivos()" />
-          <ul id="lista-arquivos"></ul>
-
-          <br>
-          <button type="button">
-            <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Enviar
-          </button>
-          <button type="button" onclick="fecharAnexo()">❌ Cancelar</button>
-        </div>
-      </fieldset>
-
-      <button type="submit">Abrir Chamado</button>
-    </form>
+    <!-- 📋 Tabela -->
+    <section class="lista-chamados">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Máquina</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>#1234</td>
+            <td>Prensa A1</td>
+            <td><span class="status aberto">Aberto</span></td>
+            <td>Alta</td>
+            <td>10/07/2025</td>
+            <td>
+              <button class="btn-detalhe">🔍 Detalhes</button>
+              <button class="btn-acao">⚙️ Atender</button>
+            </td>
+          </tr>
+          <tr>
+            <td>#1235</td>
+            <td>Torno C3</td>
+            <td><span class="status andamento">Em Andamento</span></td>
+            <td>Média</td>
+            <td>09/07/2025</td>
+            <td>
+              <button class="btn-detalhe">🔍 Detalhes</button>
+              <button class="btn-acao">✅ Finalizar</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </main>
 
   <script>

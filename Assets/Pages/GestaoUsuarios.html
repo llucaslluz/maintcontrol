@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Gestão de Permissões - MaintControl</title>
-  <link rel="stylesheet" href="../CSS/gestaoPermissoes.css" />
+  <title>Gestão de Usuários - MaintControl</title>
+  <link rel="stylesheet" href="../CSS/gestaoUsuarios.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
   <script defer src="../JS/sidebar.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+
 
   <aside class="sidebar">
     <div class="logo-box">
@@ -67,63 +68,73 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
-<main class="conteudo">
-  <h1>Gestão de Permissões</h1>
-  <p>Defina e visualize as permissões atribuídas por categoria de usuário.</p>
+ <main class="conteudo">
+  <h1>Gestão de Usuários</h1>
+  <p>Crie, edite ou remova usuários do sistema. Acesso restrito a Supervisores e Administradores.</p>
 
   <!-- 🔍 FILTROS -->
   <section class="filtros-dashboard">
+    <input type="text" placeholder="🔍 Nome..." />
+    <input type="text" placeholder="🔍 Chapa..." />
     <select>
-      <option value="">Categoria</option>
+      <option>Categoria</option>
       <option>Operador</option>
       <option>Técnico</option>
       <option>Supervisor</option>
       <option>ADM</option>
     </select>
-    <button>🔎 Buscar Permissões</button>
+    <select>
+      <option>Status</option>
+      <option>Ativo</option>
+      <option>Inativo</option>
+    </select>
   </section>
 
   <!-- 🎛️ AÇÕES RÁPIDAS -->
   <section class="acoes-rapidas">
-    <button onclick="alert('Nova permissão')">➕ Nova Permissão</button>
-    <button onclick="alert('Exportar permissões')">📁 Exportar Lista</button>
+    <button onclick="alert('Abrir formulário de cadastro')">➕ Adicionar Novo Usuário</button>
+    <button onclick="alert('Exportar usuários')">📁 Exportar Lista</button>
   </section>
 
-  <!-- 📄 TABELA -->
-  <section class="lista-permissoes">
+  <!-- 📄 LISTA DE USUÁRIOS -->
+  <section class="lista-usuarios">
     <table>
       <thead>
         <tr>
-          <th>Permissão</th>
-          <th>Descrição</th>
-          <th>Atribuída</th>
+          <th>Nome</th>
+          <th>Chapa</th>
+          <th>Categoria</th>
+          <th>Status</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>abrir_chamado</td>
-          <td>Permite ao usuário abrir chamados</td>
-          <td><span class="status ativo">✔️</span></td>
+          <td>Carlos Alberto</td>
+          <td>1234567</td>
+          <td>Operador</td>
+          <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>
-            <button class="danger">Remover</button>
+            <button class="danger">Excluir</button>
           </td>
         </tr>
         <tr>
-          <td>ver_dashboard</td>
-          <td>Acesso ao painel principal</td>
-          <td><span class="status inativo">❌</span></td>
+          <td>Ana Beatriz</td>
+          <td>2345678</td>
+          <td>Técnico</td>
+          <td><span class="status ativo">Ativo</span></td>
           <td>
             <button>Editar</button>
-            <button class="danger">Remover</button>
+            <button class="danger">Excluir</button>
           </td>
         </tr>
+        <!-- ... -->
       </tbody>
     </table>
   </section>

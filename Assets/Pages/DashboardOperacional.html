@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="../Images/V-sem-fundo.png" type="image/png">
-  <title>Dashboard - Manutenção | MaintControl</title>
+  <title>Dashboard - Operacional | MaintControl</title>
+  <link rel="stylesheet" href="../CSS/dashboardOperacional.css" />
   <link rel="stylesheet" href="../CSS/sidebar.css" />
-  <link rel="stylesheet" href="../CSS/dashboardManutencao.css" />
-  <link rel="stylesheet" href="../CSS/botaoEmergencia.css" />
-      <link rel="stylesheet" href="../CSS/loader.css" />
+    <link rel="stylesheet" href="../CSS/botaoEmergencia.css" />
+        <link rel="stylesheet" href="../CSS/loader.css" />
     <script defer src="../JS/loader.js"></script>
   <script defer src="../JS/botaoEmergencia.js"></script>
   <script defer src="../JS/sidebar.js"></script>
@@ -79,16 +79,16 @@
 
       <div class="menu-inferior">
         <hr />
-        <a href="index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
+        <a href="../index.html" class="sair-link"><i data-lucide="log-out"></i> Sair</a>
       </div>
     </div>
   </aside>
 
- <main class="conteudo">
-  <h1>Dashboard de Manutenção</h1>
-  <p>Terminal de controle da equipe de manutenção com acesso total aos chamados e máquinas.</p>
-  
-<!-- 🔴 Botão de Emergência -->
+<main class="conteudo">
+  <h1>Dashboard Operacional</h1>
+  <p>Visualize os chamados do seu setor e o status das máquinas em tempo real.</p>
+
+  <!-- 🔴 Botão de Emergência -->
 <button class="botao-emergencia" onclick="abrirModalEmergencia()">🚨 EMERGÊNCIA</button>
 
 <!-- 🔁 Modal de Emergência -->
@@ -108,76 +108,65 @@
   </div>
 </div>
 
-
   <!-- 🔹 VISÃO GERAL -->
   <section class="resumo-status">
-    <div class="card-status aberto">📂 Abertos<br><strong>3</strong></div>
-    <div class="card-status andamento">🔄 Em Andamento<br><strong>4</strong></div>
-    <div class="card-status concluido">✅ Concluídos<br><strong>6</strong></div>
-    <div class="card-status pendente">⚠️ Pendentes<br><strong>1</strong></div>
+    <div class="card-status aberto">📂 Abertos<br><strong>2</strong></div>
+    <div class="card-status andamento">🔄 Em Andamento<br><strong>1</strong></div>
   </section>
 
   <!-- 🔹 FILTROS -->
   <section class="filtros-dashboard">
-    <select><option>Status</option><option>Aberto</option><option>Em Andamento</option><option>Concluído</option><option>Com Pendência</option></select>
-    <select><option>Local</option><option>Expedição</option><option>Usinagem</option></select>
+    <select><option>Status</option><option>Aberto</option><option>Em Andamento</option></select>
+    <select><option>Local</option><option>Expedição</option><option>Montagem</option></select>
     <select><option>Máquina</option><option>Prensa A1</option><option>Torno C3</option></select>
-    <select><option>Técnico</option><option>João</option><option>Ana</option><option>Lucas</option></select>
     <select><option>Status da Máquina</option><option>Rodando</option><option>Parada</option><option>Manutenção</option></select>
   </section>
 
-  <!-- 🔹 TABELA DE CHAMADOS -->
+  <!-- 🔹 AÇÕES -->
+  <section class="acoes-rapidas">
+    <button onclick="window.location.href='../Pages/AbrirChamadoUsuario.html'">➕ Abrir Chamado</button>
+    <button onclick="window.location.href='../Pages/Mapa.html'">🗺️ Ver Mapa da Planta</button>
+  </section>
+
+  <!-- 🔹 LISTA DE CHAMADOS -->
   <section class="lista-chamados">
-    <h2>Chamados Ativos</h2>
+    <h2>Chamados do Local</h2>
     <table>
       <thead>
         <tr>
           <th>ID</th>
           <th>Máquina</th>
           <th>Status</th>
-          <th>Responsável</th>
+          <th>Prioridade</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>#1250</td>
+          <td>#1240</td>
           <td>Prensa A1</td>
           <td>Aberto</td>
-          <td>—</td>
-          <td>
-            <button>Atender</button>
-            <button>Ver Detalhe</button>
-          </td>
+          <td>Alta</td>
+          <td><button>Ver Detalhe</button></td>
         </tr>
         <tr>
-          <td>#1251</td>
+          <td>#1241</td>
           <td>Torno C3</td>
           <td>Em Andamento</td>
-          <td>João</td>
-          <td>
-            <button>Finalizar</button>
-            <button>Adicionar Anexo</button>
-            <button>Criar Pendência</button>
-          </td>
+          <td>Média</td>
+          <td><button>Ver Detalhe</button></td>
         </tr>
       </tbody>
     </table>
   </section>
 
-  <!-- 🔹 ALTERAÇÕES RECENTES -->
+  <!-- 🔹 MÁQUINAS COM ALTERAÇÕES RECENTES -->
   <section class="alteracoes-recentes">
     <h2>Máquinas com Alterações Recentes</h2>
     <ul>
-      <li>Compressor X - Em Manutenção - Técnico Ana às 16:20</li>
-      <li>Prensa A3 - Preparação - Técnico Lucas às 15:00</li>
+      <li>Prensa A1 - Parada - por Técnico João às 14:15</li>
+      <li>Ponte C2 - Produção - por Operador Lucas às 14:00</li>
     </ul>
-  </section>
-
-  <!-- 🔹 ATALHOS -->
-  <section class="atalhos-gestao">
-    <h2>Atalhos Rápidos</h2>
-    <button onclick="location.href='../Pages/Mapa.html'">🗺️ Ver Mapa da Planta</button>
   </section>
 </main>
 
