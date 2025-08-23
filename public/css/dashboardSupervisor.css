@@ -177,3 +177,35 @@ h1 {
     margin: 4px 2px;
   }
 }
+
+/* ✅ Submenu flutuante no mobile (exibido ao clicar no ícone) */
+@media (max-width: 768px) {
+  .submenu.mobile-dropdown-menu {
+    position: fixed;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 8px 0;
+    z-index: 1000;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .submenu.mobile-dropdown-menu a {
+    padding: 12px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+  }
+
+  .submenu.mobile-dropdown-menu a:last-child {
+    border-bottom: none;
+  }
+}
