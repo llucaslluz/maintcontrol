@@ -274,3 +274,15 @@ body {
     padding: 20px;
   }
 }
+
+/* 👇 Esconde os botões mobile no desktop */
+.mobile-only {
+  display: none;
+}
+
+/* 👆 Mostra somente no mobile */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex !important;
+  }
+}
