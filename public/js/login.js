@@ -1,19 +1,27 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('loginForm');
+// login.js
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('loginForm');
 
-        const chapa = document.getElementById('registro').value.trim();
-        const senha = document.getElementById('senha').value.trim();
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-        // Simulação de verificação
-        if (chapa === 'Andre' && senha === 'Morais') {
-            alert('✅ Login realizado com sucesso!');
-            // redireciona para o dashboard
-            window.location.href = "/DashboardSupervisorAdm.html";
-        } else {
-            alert('❌ Chapa ou senha inválidos. Tente novamente.');
-        }
-    });
+    const chapa = document.getElementById('registro').value.trim();
+    const senha = document.getElementById('senha').value.trim();
+
+    // Simulação de login (pode trocar por autenticação real depois)
+    if (chapa === 'Andre' && senha === 'Morais') {
+      alert('✅ Login realizado com sucesso!');
+      
+      // Opcional: mostrar o loader manualmente
+      window.MCLoader?.show();
+
+      // Redirecionar após 500ms para mostrar o carregamento
+      setTimeout(() => {
+        window.location.href = "/DashboardSupervisorAdm.html";
+      }, 500);
+    } else {
+      alert('❌ Chapa ou senha inválidos. Tente novamente.');
+    }
+  });
 });
