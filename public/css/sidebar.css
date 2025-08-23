@@ -214,8 +214,8 @@ body {
 }
 
 /* 🔄 RESPONSIVIDADE TOTAL PARA CELULAR */
+/* 🔄 MELHORADO: SIDEBAR FIXA INFERIOR COM ÍCONES FUNCIONAIS */
 @media (max-width: 768px) {
-  /* 📦 Sidebar vira barra inferior fixa */
   .sidebar {
     position: fixed;
     bottom: 0;
@@ -230,16 +230,13 @@ body {
     z-index: 100;
   }
 
-  /* 🔕 Oculta texto do logo e outros */
   .logo-box,
   .logo-text,
-  .menu-title,
-  .submenu,
   .menu-inferior {
     display: none;
   }
 
-  /* 🟦 Mostra só os ícones */
+  /* 🔘 Mostra todos os links principais como ícone apenas */
   .menu-superior {
     flex-direction: row;
     flex-wrap: nowrap;
@@ -249,22 +246,31 @@ body {
     justify-content: space-around;
   }
 
-  .menu-superior a {
-    padding: 6px;
+  .menu-superior a,
+  .menu-dropdown a.primeiro-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 0;
+    padding: 6px;
     background: none;
-    border-radius: 6px;
   }
 
-  .menu-superior a i {
+  .menu-superior a i,
+  .menu-dropdown a.primeiro-link i {
     font-size: 22px;
     color: white;
   }
 
-  /* 📄 Conteúdo ocupa toda a tela */
+  /* Esconde títulos e submenus */
+  .menu-title,
+  .submenu {
+    display: none !important;
+  }
+
   .conteudo {
     margin-left: 0;
-    margin-bottom: 70px; /* espaço pro menu inferior */
+    margin-bottom: 70px;
     padding: 20px;
   }
 }
