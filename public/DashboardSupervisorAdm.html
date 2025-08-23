@@ -12,6 +12,7 @@
     <script defer src="/js/loader.js"></script>
   <script defer src="/js/botaoEmergencia.js"></script>
   <script defer src="/js/sidebar.js"></script>
+  <script defer src="/js/mobileMenu.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -35,22 +36,19 @@
 
         <a href="DashboardSupervisorAdm.html"><i data-lucide="layout-dashboard"></i> Dashboard</a>
 
-        <div class="menu-dropdown">
-          <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
-          
-<a href="/AbrirChamadoUsuario.html" class="primeiro-link mobile-only" title="Abrir Chamado">
-  <i data-lucide="plus-circle"></i>
-</a>
+<div class="menu-dropdown">
+  <div class="menu-title"><i data-lucide="file-text"></i> Chamados</div>
 
-<a href="/ListagemChamados.html" class="primeiro-link mobile-only" title="Lista de Chamados">
-  <i data-lucide="list"></i>
-</a>
-          
-          <div class="submenu">
-            <a href="/AbrirChamadoUsuario.html">Abrir Chamado</a>
-            <a href="/ListagemChamados.html">Lista de Chamados</a>
-          </div>
-        </div>
+  <!-- ÍCONE MOBILE COM DROPDOWN -->
+  <div class="mobile-dropdown-trigger" data-menu="menu-chamados">
+    <i data-lucide="file-text"></i>
+  </div>
+
+  <div class="submenu" id="menu-chamados">
+    <a href="/AbrirChamadoUsuario.html">Abrir Chamado</a>
+    <a href="/ListagemChamados.html">Lista de Chamados</a>
+  </div>
+</div>
 
         <div class="menu-dropdown">
           <div class="menu-title"><i data-lucide="map"></i> Mapas</div>

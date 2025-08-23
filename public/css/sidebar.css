@@ -286,3 +286,50 @@ body {
     display: flex !important;
   }
 }
+
+/* ✅ Oculta botão mobile no desktop */
+.mobile-dropdown-trigger {
+  display: none;
+  cursor: pointer;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  background-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .menu-title, .submenu {
+    display: none !important;
+  }
+
+  .mobile-dropdown-trigger {
+    display: flex;
+  }
+
+  /* 🔽 Dropdown flutuante */
+  .mobile-dropdown-menu {
+    position: absolute;
+    bottom: 70px;
+    background: white;
+    border: 1px solid #ccc;
+    box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    padding: 10px;
+    width: 180px;
+    flex-direction: column;
+    z-index: 999;
+  }
+
+  .mobile-dropdown-menu a {
+    padding: 10px;
+    font-size: 14px;
+    text-decoration: none;
+    color: #333;
+    border-bottom: 1px solid #eee;
+  }
+
+  .mobile-dropdown-menu a:last-child {
+    border-bottom: none;
+  }
+}
