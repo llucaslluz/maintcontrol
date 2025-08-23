@@ -122,3 +122,58 @@ h1 {
 .atalhos-gestao button:hover {
   background-color: #2e7d32;
 }
+
+/* ... (todo o seu CSS original vem antes, mantido igual) ... */
+
+/* 🔄 RESPONSIVIDADE PARA CONTEÚDO PRINCIPAL */
+@media (max-width: 768px) {
+  .resumo-status,
+  .filtros-dashboard,
+  .acoes-rapidas,
+  .atalhos-gestao {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filtros-dashboard select,
+  .filtros-dashboard input[type="date"] {
+    width: 100%;
+  }
+
+  .acoes-rapidas button,
+  .atalhos-gestao button {
+    width: 100%;
+  }
+
+  .lista-chamados table {
+    font-size: 12px;
+    overflow-x: auto;
+    display: block;
+  }
+
+  .lista-chamados table thead {
+    display: none;
+  }
+
+  .lista-chamados table tbody tr {
+    display: block;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fff;
+  }
+
+  .lista-chamados table tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 4px;
+    border: none;
+  }
+
+  .lista-chamados td button {
+    flex: 1;
+    margin: 4px 2px;
+  }
+}

@@ -165,3 +165,50 @@ body {
   color: #aad1ff;
 }
 
+/* ... (todo o seu CSS original vem antes, mantido igual) ... */
+
+/* 🔄 RESPONSIVIDADE PARA SIDEBAR EM TELAS PEQUENAS */
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 15px;
+  }
+
+  .logo-box {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .menu-container {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+  }
+
+  .menu-superior {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+  }
+
+  .menu-superior a {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .menu-inferior {
+    display: none;
+  }
+
+  .conteudo {
+    margin-left: 0;
+    padding: 20px;
+  }
+}
