@@ -1,4 +1,4 @@
-// loader.js
+// loader-voith.js
 window.addEventListener("DOMContentLoaded", () => {
   const loader = document.getElementById("voith-loader");
   const MIN_TIME = 1000; // tempo mínimo visível para evitar "piscar"
@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
     window.addEventListener("load", hideLoader, { once: true });
   }
 
-  // Acesso global (usado manualmente em outras ações se necessário)
+  // Se quiser usar manualmente em outras ações:
   window.MCLoader = {
     show: () => loader?.classList.remove('is-hidden'),
     hide: () => loader?.classList.add('is-hidden')
