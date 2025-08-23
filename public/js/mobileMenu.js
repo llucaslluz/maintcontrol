@@ -1,4 +1,4 @@
-<script>
+
 document.addEventListener('DOMContentLoaded', () => {
   lucide.createIcons();
 
@@ -40,4 +40,3 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
-</script>
