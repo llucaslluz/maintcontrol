@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Clica fora fecha
+  // Clicar fora do menu fecha ele
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.mobile-dropdown-trigger') && !e.target.closest('.mobile-dropdown-menu')) {
       if (activeMenu) {
