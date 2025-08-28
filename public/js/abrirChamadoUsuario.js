@@ -5,18 +5,22 @@ document.addEventListener('DOMContentLoaded', function () {
   const inputArquivos = document.getElementById('arquivo');
   const listaArquivos = document.getElementById('lista-arquivos');
 
+  // 🟢 Exibe a modal de anexo
   window.abrirAnexo = function () {
     if (modalAnexo) modalAnexo.classList.add('show');
     if (botaoAnexo) botaoAnexo.style.display = 'none';
   }
 
+  // 🔴 Fecha a modal de anexo
   window.fecharAnexo = function () {
     if (modalAnexo) modalAnexo.classList.remove('show');
     if (botaoAnexo) botaoAnexo.style.display = 'inline-flex';
   }
 
+  // 📎 Exibe nomes dos arquivos anexados
   window.mostrarNomeArquivos = function () {
     listaArquivos.innerHTML = "";
+
     if (inputArquivos.files.length > 0) {
       Array.from(inputArquivos.files).forEach(file => {
         const li = document.createElement('li');
@@ -26,66 +30,75 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  form.addEventListener('submit', async function (event) {
+  // ✅ Validação simples de formulário
+  form.addEventListener('submit', function (event) {
     event.preventDefault();
 
-    const localNome = document.getElementById('local').value;
-    const maquinaNome = document.getElementById('maquina').value;
+    const local = document.getElementById('local').value;
+    const maquina = document.getElementById('maquina').value;
     const tipo = document.getElementById('tipo').value;
     const status = document.getElementById('status').value;
     const prioridade = document.getElementById('prioridade').value;
     const descricao = document.getElementById('descricao').value.trim();
 
-    if (!localNome || !maquinaNome || !tipo || !status || !prioridade || !descricao) {
+    if (!local || !maquina || !tipo || !status || !prioridade || !descricao) {
       alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
       return;
     }
 
-    // 👉 Etapa 3: Buscar os UUIDs no Supabase
-    try {
-      const { data: locais, error: errorLocal } = await supabase
-        .from('local')
-        .select('id_local')
-        .eq('nome_local', localNome)
-        .single();
-
-      const { data: maquinas, error: errorMaquina } = await supabase
-        .from('maquina_dispositivo')
-        .select('id_maquina')
-        .eq('nome_maquina', maquinaNome)
-        .single();
-
-      if (errorLocal || !locais) throw new Error('Local não encontrado');
-      if (errorMaquina || !maquinas) throw new Error('Máquina não encontrada');
-
-      // ⚙️ Monta objeto de chamado
-      const novoChamado = {
-        id_local: locais.id_local,
-        id_maquina: maquinas.id_maquina,
-        tipo_manutencao: tipo,
-        status_maquina: status,
-        prioridade: prioridade,
-        descricao_problema: descricao,
-        // futuramente: id_usuario, data, etc...
-      };
-
-      // 📨 Envia para o Supabase
-      const { data, error } = await supabase
-        .from('chamado')
-        .insert([novoChamado]);
-
-      if (error) {
-        console.error('Erro ao salvar chamado:', error);
-        alert("❌ Erro ao abrir o chamado. Tente novamente.");
-      } else {
-        alert("✅ Chamado aberto com sucesso!");
-        form.reset();
-        listaArquivos.innerHTML = "";
-        fecharAnexo();
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Erro ao processar o chamado.");
-    }
+    alert("✅ Chamado aberto com sucesso!");
+    form.reset();
+    listaArquivos.innerHTML = "";
+    fecharAnexo(); // Garante que modal feche se estiver aberta
   });
 });
+
+async function carregarMaquinas() {
+  const selectMaquina = document.getElementById('maquina');
+
+  const { data, error } = await supabase
+    .from('maquina_dispositivo')
+    .select('id_maquina, nome_maquina')
+    .order('nome_maquina', { ascending: true });
+
+  if (error) {
+    console.error("Erro ao carregar máquinas:", error.message);
+    return;
+  }
+
+  data.forEach(maquina => {
+    const option = document.createElement('option');
+    option.value = maquina.id_maquina;
+    option.textContent = maquina.nome_maquina;
+    selectMaquina.appendChild(option);
+  });
+}
+
+// Chama a função ao carregar a página
+carregarMaquinas();
+
+async function carregarLocais() {
+  const selectLocal = document.getElementById('local');
+
+  const { data, error } = await supabase
+    .from('local')
+    .select('id_local, nome_local')
+    .order('nome_local', { ascending: true });
+
+  if (error) {
+    console.error("Erro ao carregar locais:", error.message);
+    return;
+  }
+
+  data.forEach(local => {
+    const option = document.createElement('option');
+    option.value = local.id_local;
+    option.textContent = local.nome_local;
+    selectLocal.appendChild(option);
+  });
+}
+
+// Carregar máquinas e locais ao abrir a página
+carregarMaquinas();
+carregarLocais();
+
