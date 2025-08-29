@@ -120,3 +120,27 @@ async function carregarLocais() {
 carregarMaquinas();
 carregarLocais();
 });
+
+async function carregarTiposManutencao() {
+  const selectTipo = document.getElementById('tipo');
+  const { data, error } = await supabase
+    .from('tipo_manutencao')
+    .select('id_tipo_manutencao, nome_tipo')
+    .order('nome_tipo', { ascending: true });
+
+  if (error) {
+    console.error("Erro ao carregar tipos de manutenção:", error.message);
+    return;
+  }
+
+  data.forEach(tipo => {
+    const option = document.createElement('option');
+    option.value = tipo.id_tipo_manutencao;
+    option.textContent = tipo.nome_tipo;
+    selectTipo.appendChild(option);
+  });
+}
+
+carregarLocais();
+carregarMaquinas();
+carregarTiposManutencao();
