@@ -137,9 +137,4 @@ document.addEventListener('DOMContentLoaded', function () {
     listaArquivos.innerHTML = "";
     fecharAnexo();
   });
-
-  // ⏬ Executa os carregamentos
-  carregarLocais();
-  carregarMaquinas();
-  carregarTiposManutencao();
 });
