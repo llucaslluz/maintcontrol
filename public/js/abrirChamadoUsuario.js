@@ -31,27 +31,45 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ✅ Validação simples de formulário
-  form.addEventListener('submit', function (event) {
-    event.preventDefault();
+form.addEventListener('submit', async function (event) {
+  event.preventDefault();
 
-    const local = document.getElementById('local').value;
-    const maquina = document.getElementById('maquina').value;
-    const tipo = document.getElementById('tipo').value;
-    const status = document.getElementById('status').value;
-    const prioridade = document.getElementById('prioridade').value;
-    const descricao = document.getElementById('descricao').value.trim();
+  const local = document.getElementById('local').value;
+  const maquina = document.getElementById('maquina').value;
+  const tipo = document.getElementById('tipo').value;
+  const status = document.getElementById('status').value;
+  const prioridade = document.getElementById('prioridade').value;
+  const descricao = document.getElementById('descricao').value.trim();
 
-    if (!local || !maquina || !tipo || !status || !prioridade || !descricao) {
-      alert("⚠️ Por favor, preencha todos os campos obrigatórios.");
-      return;
-    }
+  // ID fixo do usuário (teste) - idealmente isso viria de um sistema de autenticação
+  const idUsuario = "00000000-0000-0000-0000-000000000000"; // <- depois vamos substituir isso
 
-    alert("✅ Chamado aberto com sucesso!");
-    form.reset();
-    listaArquivos.innerHTML = "";
-    fecharAnexo(); // Garante que modal feche se estiver aberta
-  });
+  const { data, error } = await supabase
+    .from('chamado')
+    .insert([{
+      id_solicitante: idUsuario,
+      id_local: local,
+      id_maquina: maquina,
+      id_tipo_manutencao: tipo,
+      status_maquina: status,
+      prioridade: prioridade,
+      descricao_problema: descricao,
+      data_hora_abertura: new Date().toISOString(),
+      status_chamado: "Aberto"
+    }]);
+
+  if (error) {
+    console.error("Erro ao abrir chamado:", error.message);
+    alert("❌ Erro ao abrir chamado. Veja o console.");
+    return;
+  }
+
+  alert("✅ Chamado aberto com sucesso!");
+  form.reset();
+  listaArquivos.innerHTML = "";
+  fecharAnexo();
 });
+
 
 async function carregarMaquinas() {
   const selectMaquina = document.getElementById('maquina');
@@ -101,4 +119,4 @@ async function carregarLocais() {
 // Carregar máquinas e locais ao abrir a página
 carregarMaquinas();
 carregarLocais();
-
+});
