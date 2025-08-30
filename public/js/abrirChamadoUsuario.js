@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 🔄 Carregar Máquinas
   async function carregarMaquinas() {
     const selectMaquina = document.getElementById('maquina');
-    selectLocal.innerHTML = '<option value="">Selecione</option>';
+  //  selectLocal.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
       .from('maquina_dispositivo')
