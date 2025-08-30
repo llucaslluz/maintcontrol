@@ -99,6 +99,30 @@ async function carregarTiposManutencao() {
   });
 }
 
+// 🔄 Carregar Status da Máquina
+async function carregarStatusMaquina() {
+  const selectStatus = document.getElementById('status');
+  selectStatus.innerHTML = '<option value="">Selecione</option>';
+
+  const { data, error } = await supabase
+    .from('status_maquina')
+    .select('id_status, nome_status')
+    .order('nome_status', { ascending: true });
+
+  if (error) {
+    console.error("Erro ao carregar status da máquina:", error.message);
+    return;
+  }
+
+  data.forEach(status => {
+    const option = document.createElement('option');
+    option.value = status.nome_status;
+    option.textContent = status.nome_status;
+    selectStatus.appendChild(option);
+  });
+}
+
+
   // ✅ Submit do formulário
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
@@ -138,8 +162,39 @@ async function carregarTiposManutencao() {
     fecharAnexo();
   });
 
+  const { data, error } = await supabase
+  .from('chamado')
+  .insert([{
+    id_solicitante: idUsuario,
+    id_local: local,
+    id_maquina: maquina,
+    id_tipo_manutencao: tipo,
+    status_maquina: status,
+    prioridade: prioridade,
+    descricao_problema: descricao,
+    data_hora_abertura: new Date().toISOString(),
+    status_chamado: "Aberto"
+  }])
+  .select();  // <-- necessário para pegar o ID do chamado criado
+
+if (error) {
+  console.error("Erro ao abrir chamado:", error.message);
+  alert("❌ Erro ao abrir chamado. Veja o console.");
+  return;
+}
+
+const novoChamado = data[0];  // Pega o chamado recém criado
+await uploadAnexos(novoChamado.id_chamado, idUsuario);  // ⬅️ Aqui!
+
+alert("✅ Chamado aberto com sucesso!");
+form.reset();
+listaArquivos.innerHTML = "";
+fecharAnexo();
+
+
   // ⏬ Executa os carregamentos
   carregarLocais();
   carregarMaquinas();
   carregarTiposManutencao();
+  carregarStatusMaquina();
 });
