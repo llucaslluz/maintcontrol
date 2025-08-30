@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 🔄 Carregar Locais
   async function carregarLocais() {
     const selectLocal = document.getElementById('local');
+    selectLocal.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
       .from('local')
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 🔄 Carregar Máquinas
   async function carregarMaquinas() {
     const selectMaquina = document.getElementById('maquina');
+    selectLocal.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
       .from('maquina_dispositivo')
@@ -77,6 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 🔄 Carregar Tipos de Manutenção
   async function carregarTiposManutencao() {
     const selectTipo = document.getElementById('tipo');
+    selectLocal.innerHTML = '<option value="">Selecione</option>';
 
     // Limpa os valores fixos do HTML
     selectTipo.innerHTML = '<option value="">Selecione</option>';
