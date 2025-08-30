@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const prioridade = document.getElementById('prioridade').value;
     const descricao = document.getElementById('descricao').value.trim();
 
-    const idUsuario = "00000000-0000-0000-0000-000000000000"; // <-- mock fixo
+    const idUsuario = "5c5b36b6-e3ad-48d5-adbe-70cb2bb15d5a"; // <-- mock fixo
 
     const { data, error } = await supabase
       .from('chamado')
