@@ -112,13 +112,13 @@ async function carregarTiposManutencao() {
     const prioridade = document.getElementById('prioridade').value;
     const descricao = document.getElementById('descricao').value.trim();
 
-    const idUsuario = "5c5b36b6-e3ad-48d5-adbe-70cb2bb15d5a"; // mock fixo
+    const idUsuario = "null"; // mock fixo
 
     // 🟡 Primeiro, cria o chamado
 const { data, error } = await supabase
   .from('chamado')
   .insert([{
-    id_solicitante: idUsuario,
+    id_solicitante: null,
     id_local: local,
     id_maquina: maquina,
     id_tipo_manutencao: tipo,
