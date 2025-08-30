@@ -102,49 +102,50 @@ async function carregarTiposManutencao() {
 
 
 // ✅ Submit do formulário
-form.addEventListener('submit', async function (event) {
-  event.preventDefault();
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
 
-  const local = document.getElementById('local').value;
-  const maquina = document.getElementById('maquina').value;
-  const tipo = document.getElementById('tipo').value;
-  const status = document.getElementById('status').value;
-  const prioridade = document.getElementById('prioridade').value;
-  const descricao = document.getElementById('descricao').value.trim();
+    const local = document.getElementById('local').value;
+    const maquina = document.getElementById('maquina').value;
+    const tipo = document.getElementById('tipo').value;
+    const status = document.getElementById('status')?.value || "Desconhecido";
+    const prioridade = document.getElementById('prioridade').value;
+    const descricao = document.getElementById('descricao').value.trim();
 
-  const idUsuario = "5c5b36b6-e3ad-48d5-adbe-70cb2bb15d5a"; // ← mock fixo
+    const idUsuario = "5c5b36b6-e3ad-48d5-adbe-70cb2bb15d5a"; // mock fixo
 
-  const { data, error } = await supabase
-    .from('chamado')
-    .insert([{
-      id_solicitante: idUsuario,
-      id_local: local,
-      id_maquina: maquina,
-      id_tipo_manutencao: tipo,
-      status_maquina: status,
-      prioridade: prioridade,
-      descricao_problema: descricao,
-      data_hora_abertura: new Date().toISOString(),
-      status_chamado: "Aberto"
-    }])
-    .select(); // ← necessário para pegar o ID do chamado criado
+    // 🟡 Primeiro, cria o chamado
+    const { data, error } = await supabase
+      .from('chamado')
+      .insert([{
+        id_solicitante: idUsuario,
+        id_local: local,
+        id_maquina: maquina,
+        id_tipo_manutencao: tipo,
+        status_maquina: status,
+        prioridade: prioridade,
+        descricao_problema: descricao,
+        data_hora_abertura: new Date().toISOString(),
+        status_chamado: "Aberto"
+      }])
+      .select();
 
-  if (error) {
-    console.error("Erro ao abrir chamado:", error.message);
-    alert("❌ Erro ao abrir chamado. Veja o console.");
-    return;
-  }
+    if (error) {
+      console.error("Erro ao abrir chamado:", error.message);
+      alert("❌ Erro ao abrir chamado. Veja o console.");
+      return;
+    }
 
-  const novoChamado = data[0];
+    const novoChamado = data[0];
 
-  // 🟢 Upload dos anexos após inserção do chamado
-  await uploadAnexos(novoChamado.id_chamado, idUsuario);
+    // 🔵 Em seguida, envia os anexos (se houver)
+    await uploadAnexos(novoChamado.id_chamado, idUsuario);
 
-  alert("✅ Chamado aberto com sucesso!");
-  form.reset();
-  listaArquivos.innerHTML = "";
-  fecharAnexo();
-});
+    alert("✅ Chamado aberto com sucesso!");
+    form.reset();
+    listaArquivos.innerHTML = "";
+    fecharAnexo();
+  });
 
 
 
