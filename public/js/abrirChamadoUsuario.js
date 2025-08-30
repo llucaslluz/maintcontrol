@@ -99,28 +99,6 @@ async function carregarTiposManutencao() {
   });
 }
 
-// 🔄 Carregar Status da Máquina
-async function carregarStatusMaquina() {
-  const selectStatus = document.getElementById('status');
-  selectStatus.innerHTML = '<option value="">Selecione</option>';
-
-  const { data, error } = await supabase
-    .from('status_maquina')
-    .select('id_status, nome_status')
-    .order('nome_status', { ascending: true });
-
-  if (error) {
-    console.error("Erro ao carregar status da máquina:", error.message);
-    return;
-  }
-
-  data.forEach(status => {
-    const option = document.createElement('option');
-    option.value = status.nome_status;
-    option.textContent = status.nome_status;
-    selectStatus.appendChild(option);
-  });
-}
 
 
 // ✅ Submit do formulário
@@ -174,5 +152,4 @@ form.addEventListener('submit', async function (event) {
   carregarLocais();
   carregarMaquinas();
   carregarTiposManutencao();
-  carregarStatusMaquina();
 });
