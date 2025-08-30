@@ -115,19 +115,20 @@ async function carregarTiposManutencao() {
     const idUsuario = "5c5b36b6-e3ad-48d5-adbe-70cb2bb15d5a"; // mock fixo
 
     // 🟡 Primeiro, cria o chamado
-    const { data, error } = await supabase
-      .from('chamado')
-      .insert([{
-        id_solicitante: idUsuario,
-        id_local: local,
-        id_maquina: maquina,
-        id_tipo_manutencao: tipo,
-        status_maquina: status,
-        prioridade: prioridade,
-        descricao_problema: descricao,
-        data_hora_abertura: new Date().toISOString(),
-        status_chamado: "Aberto"
-      }])
+const { data, error } = await supabase
+  .from('chamado')
+  .insert([{
+    id_solicitante: idUsuario,
+    id_local: local,
+    id_maquina: maquina,
+    id_tipo_manutencao: tipo,
+    status_maquina: status,
+    prioridade: prioridade,
+    descricao_problema: descricao,
+    data_hora_abertura: new Date().toISOString(),
+    status_chamado: "Aberto"
+  }])
+
       .select();
 
     if (error) {
