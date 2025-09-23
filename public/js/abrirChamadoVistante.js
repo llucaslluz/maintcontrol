@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    console.log("Locais carregados:", data);
+
     data.forEach(local => {
       const option = document.createElement('option');
       option.value = local.id_local;
@@ -39,6 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
+    console.log("Máquinas carregadas:", data);
+
     data.forEach(maquina => {
       const option = document.createElement('option');
       option.value = maquina.id_maquina;
@@ -61,6 +65,8 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Erro ao carregar tipos de manutenção:", error.message);
       return;
     }
+
+    console.log("Tipos de manutenção carregados:", data);
 
     data.forEach(tipo => {
       const option = document.createElement('option');
@@ -89,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('chamado')
       .insert([{
         id_solicitante: null,
@@ -104,13 +110,16 @@ document.addEventListener('DOMContentLoaded', function () {
         descricao_problema: descricao,
         data_hora_abertura: new Date().toISOString(),
         status_chamado: "Aberto"
-      }]);
+      }])
+      .select();
 
     if (error) {
-      console.error("Erro ao abrir chamado visitante:", error.message);
+      console.error("❌ Erro ao abrir chamado visitante:", error.message);
       alert("❌ Erro ao abrir chamado. Veja o console.");
       return;
     }
+
+    console.log("Chamado visitante salvo:", data);
 
     alert("✅ Chamado aberto com sucesso!");
     form.reset();
