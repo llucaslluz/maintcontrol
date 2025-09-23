@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/images/V-sem-fundo.png" type="image/png">
   <title>Abrir Chamado - Visitante</title>
 
-  <!-- Estilos -->
+  <!-- Estilos (mantidos) -->
   <link rel="stylesheet" href="/css/abrirChamadoVisitante.css">
   <link rel="stylesheet" href="/css/anexoModal.css">
 
-  <!-- Scripts -->
-  <script defer src="/js/abrirChamadoVistante.js"></script>
-  <script defer src="/js/anexoModal.js"></script>
+  <!-- Ícones -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Supabase (carregar ANTES do JS da página!) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <!-- ATENÇÃO ao caminho e caixa: use /js/ e não /JS/ -->
+  <script defer src="/js/supabaseClient.js"></script>
 
+  <!-- Scripts da página (depois do supabaseClient) -->
+  <script defer src="/js/abrirChamadoVistante.js"></script>
+  <script defer src="/js/anexoModal.js"></script>
 </head>
 <body>
 
@@ -24,6 +29,7 @@
     <img src="/images/Voith-sem-fundo.png" alt="Logo" class="logo">
     <h2>Abertura de Chamado</h2>
 
+    <!-- ⚠️ Padronizei o ID do form para o mesmo usado na outra página -->
     <form id="formChamado">
 
       <fieldset>
@@ -44,65 +50,58 @@
 
         <label for="local">Local:</label>
         <select id="local" required>
-          <option value="">Selecione o local</option>
-          <option>Expedição</option>
-          <option>Caldeiraria</option>
-          <option>Montagem</option>
+          <option value="">Selecione</option>
         </select>
 
         <label for="maquina">Máquina:</label>
         <select id="maquina" required>
-          <option value="">Selecione a máquina</option>
-          <option>Prensa A1</option>
-          <option>Ponte Rolante B</option>
+          <option value="">Selecione</option>
         </select>
 
         <label for="tipo">Tipo de Manutenção:</label>
         <select id="tipo" required>
-          <option>Corretiva</option>
-          <option>Preventiva</option>
-          <option>Outra</option>
+          <option value="">Selecione</option>
         </select>
 
-        <label for="prioridade">Prioridade:</label>
-        <select id="prioridade" required>
-          <option>Alta</option>
-          <option>Média</option>
-          <option>Baixa</option>
-        </select>
-
+        <!-- Mesmo conjunto de valores da página do Usuário -->
         <label for="status">Status da Máquina:</label>
         <select id="status" required>
-          <option>Parada</option>
-          <option>Em Produção</option>
-          <option>Em Preparação</option>
-          <option>Em Manutenção</option>
-          <option>Sem Comunicação</option>
+          <option value="">Selecione</option>
+          <option value="Parada">Parada</option>
+          <option value="Em Operação">Em Operação</option>
+          <option value="Em Preparação">Em Preparação</option>
+          <option value="Em Manutenção">Em Manutenção</option>
+        </select>
+
+        <!-- Mesmo conjunto (valores minúsculos) -->
+        <label for="prioridade">Prioridade:</label>
+        <select id="prioridade" required>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
         </select>
 
         <label for="descricao">Descrição do Problema:</label>
         <textarea id="descricao" rows="4" required></textarea>
 
-        <!-- 🔹 Botão que abre a modal de anexo -->
+        <!-- Botão / Modal de Anexo (mantidos; upload desativado no JS) -->
         <button type="button" id="botao-anexo" class="botao-anexo" onclick="abrirAnexo()">
-          <i data-lucide="paperclip" style="width: 16px; height: 16px;"></i> Anexar
+          <i data-lucide="paperclip" style="width:16px;height:16px;"></i> Anexar
         </button>
 
-        <!-- 🔹 Modal de anexo -->
         <div id="anexo" class="anexo-modal">
           <h2>Anexar Arquivos</h2>
           <p>Selecione um ou mais arquivos (imagens, PDF, vídeos).</p>
 
           <input type="file" id="arquivo" multiple accept="image/*,.pdf,.mp4" onchange="mostrarNomeArquivos()" />
-          <ul id="lista-arquivos" style="font-size: 14px; margin-top: 8px; color: #333; padding-left: 18px;"></ul>
+          <ul id="lista-arquivos" style="font-size:14px;margin-top:8px;color:#333;padding-left:18px;"></ul>
 
           <br>
           <button type="button">
-            <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Enviar
+            <i data-lucide="upload" style="width:16px;height:16px;"></i> Enviar
           </button>
           <button type="button" onclick="fecharAnexo()">❌ Cancelar</button>
         </div>
-
       </fieldset>
 
       <button type="submit">Abrir Chamado</button>
@@ -123,12 +122,6 @@
     </footer>
   </div>
 
-  <script>
-    lucide.createIcons();
-  </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="/JS/supabaseClient.js"></script> <!-- Caminho do seu arquivo JS -->
-
+  <script> lucide.createIcons(); </script>
 </body>
 </html>
