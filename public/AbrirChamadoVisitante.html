@@ -1,134 +1,74 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="/images/V-sem-fundo.png" type="image/png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abrir Chamado - Visitante</title>
-
-  <!-- Estilos -->
-  <link rel="stylesheet" href="/css/abrirChamadoVisitante.css">
-  <link rel="stylesheet" href="/css/anexoModal.css">
-
-  <!-- Scripts -->
-  <script defer src="/js/abrirChamadoVistante.js"></script>
-  <script defer src="/js/anexoModal.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-
+  <link rel="stylesheet" href="css/abrirChamadoVisitante.css">
 </head>
 <body>
+  <main class="container">
+    <h1>Abertura de Chamado (Visitante)</h1>
 
-  <div class="chamado-box">
-    <a href="/index.html" class="voltar-btn">Voltar</a>
-    <img src="/images/Voith-sem-fundo.png" alt="Logo" class="logo">
-    <h2>Abertura de Chamado</h2>
+    <form id="formChamadoVisitante">
+      <!-- Identificação -->
+      <section>
+        <h2>Sua Identificação</h2>
+        <label>Nome:</label>
+        <input type="text" id="nome" placeholder="Digite seu nome" required />
 
-    <form id="formChamado">
+        <label>Chapa:</label>
+        <input type="text" id="chapa" placeholder="Digite sua chapa" required />
 
-      <fieldset>
-        <legend>Identificação</legend>
+        <label>Função/Cargo:</label>
+        <input type="text" id="funcao" placeholder="Ex.: Operador de Máquina" required />
+      </section>
 
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" required>
+      <!-- Detalhes do Chamado -->
+      <section>
+        <h2>Detalhes do Chamado</h2>
 
-        <label for="chapa">Chapa:</label>
-        <input type="text" id="chapa" required>
-
-        <label for="funcao">Função/Cargo:</label>
-        <input type="text" id="funcao" required>
-      </fieldset>
-
-      <fieldset>
-        <legend>Detalhes do Chamado</legend>
-
-        <label for="local">Local:</label>
+        <label>Local:</label>
         <select id="local" required>
-          <option value="">Selecione o local</option>
-          <option>Expedição</option>
-          <option>Caldeiraria</option>
-          <option>Montagem</option>
+          <option value="">Selecione</option>
         </select>
 
-        <label for="maquina">Máquina:</label>
+        <label>Máquina:</label>
         <select id="maquina" required>
-          <option value="">Selecione a máquina</option>
-          <option>Prensa A1</option>
-          <option>Ponte Rolante B</option>
+          <option value="">Selecione</option>
         </select>
 
-        <label for="tipo">Tipo de Manutenção:</label>
+        <label>Tipo de Manutenção:</label>
         <select id="tipo" required>
-          <option>Corretiva</option>
-          <option>Preventiva</option>
-          <option>Outra</option>
+          <option value="">Selecione</option>
         </select>
 
-        <label for="prioridade">Prioridade:</label>
+        <label>Prioridade:</label>
         <select id="prioridade" required>
-          <option>Alta</option>
-          <option>Média</option>
-          <option>Baixa</option>
+          <option value="">Baixa</option>
+          <option value="Média">Média</option>
+          <option value="Alta">Alta</option>
         </select>
 
-        <label for="status">Status da Máquina:</label>
+        <label>Status da Máquina:</label>
         <select id="status" required>
-          <option>Parada</option>
-          <option>Em Produção</option>
-          <option>Em Preparação</option>
-          <option>Em Manutenção</option>
-          <option>Sem Comunicação</option>
+          <option value="Em Produção">Em Produção</option>
+          <option value="Parada">Parada</option>
+          <option value="Em Preparação">Em Preparação</option>
+          <option value="Em Manutenção">Em Manutenção</option>
+          <option value="Sem Comunicação">Sem Comunicação</option>
         </select>
 
-        <label for="descricao">Descrição do Problema:</label>
-        <textarea id="descricao" rows="4" required></textarea>
+        <label>Descrição do Problema:</label>
+        <textarea id="descricao" placeholder="Descreva o problema detalhadamente" required></textarea>
+      </section>
 
-        <!-- 🔹 Botão que abre a modal de anexo -->
-        <button type="button" id="botao-anexo" class="botao-anexo" onclick="abrirAnexo()">
-          <i data-lucide="paperclip" style="width: 16px; height: 16px;"></i> Anexar
-        </button>
-
-        <!-- 🔹 Modal de anexo -->
-        <div id="anexo" class="anexo-modal">
-          <h2>Anexar Arquivos</h2>
-          <p>Selecione um ou mais arquivos (imagens, PDF, vídeos).</p>
-
-          <input type="file" id="arquivo" multiple accept="image/*,.pdf,.mp4" onchange="mostrarNomeArquivos()" />
-          <ul id="lista-arquivos" style="font-size: 14px; margin-top: 8px; color: #333; padding-left: 18px;"></ul>
-
-          <br>
-          <button type="button">
-            <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Enviar
-          </button>
-          <button type="button" onclick="fecharAnexo()">❌ Cancelar</button>
-        </div>
-
-      </fieldset>
-
-      <button type="submit">Abrir Chamado</button>
-
-      <p class="importante">
-        ⚠️ Ao abrir este chamado, uma solicitação de cadastro também será enviada para o supervisor.
-      </p>
-
-      <div class="links-uteis">
-        <a href="#">Página de Ajuda</a> |
-        <a href="#">Contato</a> |
-        <a href="#">FAQ</a>
-      </div>
+      <button type="submit" class="btn">Abrir Chamado</button>
     </form>
+  </main>
 
-    <footer>
-      <p>by <br><strong>Lucas Luz</strong></p>
-    </footer>
-  </div>
-
-  <script>
-    lucide.createIcons();
-  </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="/JS/supabaseClient.js"></script> <!-- Caminho do seu arquivo JS -->
-
+  <!-- Scripts -->
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/abrirChamadoVistante.js"></script>
 </body>
 </html>
