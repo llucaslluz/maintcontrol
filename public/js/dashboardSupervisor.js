@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 Dashboard Supervisor iniciado");
 
+  function isEmergencia(ch) {
+    // Se no futuro tiver coluna boolean 'emergencia', pode usar (ch.emergencia === true)
+    return typeof ch?.descricao_problema === "string" && ch.descricao_problema.includes("🚨");
+  }
+
   async function contarChamadosPorStatus() {
     const { data, error } = await supabase.from("chamado").select("status_chamado");
     if (error) {
@@ -9,9 +14,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     const contagem = { Aberto: 0, "Em Andamento": 0, Concluído: 0, "Com Pendência": 0 };
     data.forEach(ch => {
-      if (contagem[ch.status_chamado] !== undefined) {
-        contagem[ch.status_chamado]++;
-      }
+      if (contagem[ch.status_chamado] !== undefined) contagem[ch.status_chamado]++;
     });
     return contagem;
   }
@@ -60,23 +63,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function atualizarCards() {
     const contagem = await contarChamadosPorStatus();
-    document.getElementById("card-abertos").textContent = contagem["Aberto"] || 0;
-    document.getElementById("card-andamento").textContent = contagem["Em Andamento"] || 0;
+    document.getElementById("card-abertos").textContent    = contagem["Aberto"] || 0;
+    document.getElementById("card-andamento").textContent  = contagem["Em Andamento"] || 0;
     document.getElementById("card-concluidos").textContent = contagem["Concluído"] || 0;
-    document.getElementById("card-pendentes").textContent = contagem["Com Pendência"] || 0;
+    document.getElementById("card-pendentes").textContent  = contagem["Com Pendência"] || 0;
   }
 
   async function atualizarChamados() {
     const chamados = await listarChamadosRecentes();
     const tabela = document.getElementById("tabela-chamados");
     if (!tabela) return;
+
     tabela.innerHTML = "";
     chamados.forEach(ch => {
+      const emergenciaBadge = isEmergencia(ch) ? '<span class="tag-emergencia">🚨 Emergência</span>' : "";
       const row = document.createElement("tr");
+      if (isEmergencia(ch)) row.classList.add("chamado-emergencia");
       row.innerHTML = `
         <td>#${ch.id_chamado}</td>
         <td>${ch.maquina?.nome_maquina || "-"}</td>
-        <td>${ch.status_chamado}</td>
+        <td>${ch.status_chamado} ${emergenciaBadge}</td>
         <td>${ch.prioridade}</td>
         <td>${ch.nome_solicitante_externo || "Usuário"} (${ch.chapa_solicitante_externo || "-"})</td>
         <td>—</td>
@@ -90,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const historicos = await listarHistoricoRecentes();
     const lista = document.getElementById("lista-historico");
     if (!lista) return;
+
     lista.innerHTML = "";
     historicos.forEach(h => {
       const li = document.createElement("li");
@@ -98,7 +105,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Executa tudo
+  // Expor para o botão de emergência poder chamar depois do insert
+  window.atualizarCards = atualizarCards;
+  window.atualizarChamados = atualizarChamados;
+
+  // Atualiza quando um chamado de emergência for aberto (evento opcional)
+  document.addEventListener("chamado-emergencia-aberto", async () => {
+    await atualizarCards();
+    await atualizarChamados();
+  });
+
+  // Primeira carga
   await atualizarCards();
   await atualizarChamados();
   await atualizarHistorico();
