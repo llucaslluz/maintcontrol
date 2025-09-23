@@ -1,9 +1,36 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const form = document.getElementById('formChamadoVisitante');
+  // ⚠️ Mesma assinatura do form da página do Usuário
+  const form = document.getElementById('formChamado');
+  const botaoAnexo = document.getElementById('botao-anexo');
+  const modalAnexo = document.getElementById('anexo');
+  const inputArquivos = document.getElementById('arquivo');
+  const listaArquivos = document.getElementById('lista-arquivos');
 
-  // 🔄 Carregar Locais
+  // ---------- Modal de anexo (mantida; upload desativado) ----------
+  window.abrirAnexo = function () {
+    if (modalAnexo) modalAnexo.classList.add('show');
+    if (botaoAnexo) botaoAnexo.style.display = 'none';
+  };
+  window.fecharAnexo = function () {
+    if (modalAnexo) modalAnexo.classList.remove('show');
+    if (botaoAnexo) botaoAnexo.style.display = 'inline-flex';
+  };
+  window.mostrarNomeArquivos = function () {
+    if (!listaArquivos || !inputArquivos) return;
+    listaArquivos.innerHTML = "";
+    if (inputArquivos.files.length > 0) {
+      Array.from(inputArquivos.files).forEach(file => {
+        const li = document.createElement('li');
+        li.textContent = `📎 ${file.name}`;
+        listaArquivos.appendChild(li);
+      });
+    }
+  };
+
+  // ---------- Carregamentos ----------
   async function carregarLocais() {
     const selectLocal = document.getElementById('local');
+    if (!selectLocal) return;
     selectLocal.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
@@ -15,10 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Erro ao carregar locais:", error.message);
       return;
     }
-
-    console.log("Locais carregados:", data);
-
-    data.forEach(local => {
+    data?.forEach(local => {
       const option = document.createElement('option');
       option.value = local.id_local;
       option.textContent = local.nome_local;
@@ -26,9 +50,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 🔄 Carregar Máquinas
   async function carregarMaquinas() {
     const selectMaquina = document.getElementById('maquina');
+    if (!selectMaquina) return;
     selectMaquina.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
@@ -40,10 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Erro ao carregar máquinas:", error.message);
       return;
     }
-
-    console.log("Máquinas carregadas:", data);
-
-    data.forEach(maquina => {
+    data?.forEach(maquina => {
       const option = document.createElement('option');
       option.value = maquina.id_maquina;
       option.textContent = maquina.nome_maquina;
@@ -51,9 +72,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // 🔄 Carregar Tipos de Manutenção
   async function carregarTiposManutencao() {
     const selectTipo = document.getElementById('tipo');
+    if (!selectTipo) return;
     selectTipo.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
@@ -65,10 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error("Erro ao carregar tipos de manutenção:", error.message);
       return;
     }
-
-    console.log("Tipos de manutenção carregados:", data);
-
-    data.forEach(tipo => {
+    data?.forEach(tipo => {
       const option = document.createElement('option');
       option.value = tipo.id_tipo_manutencao;
       option.textContent = tipo.nome_tipo;
@@ -76,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ✅ Submit do formulário
+  // ---------- Submit ----------
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
 
@@ -86,16 +104,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const local = document.getElementById('local').value;
     const maquina = document.getElementById('maquina').value;
     const tipo = document.getElementById('tipo').value;
-    const status = document.getElementById('status').value;
-    const prioridade = document.getElementById('prioridade').value;
+    const status = document.getElementById('status').value;       // mesmos valores da outra página
+    const prioridade = document.getElementById('prioridade').value; // 'alta' | 'media' | 'baixa'
     const descricao = document.getElementById('descricao').value.trim();
 
-    if (!nome || !chapa || !cargo || !local || !maquina || !tipo || !prioridade || !descricao) {
+    if (!nome || !chapa || !cargo || !local || !maquina || !tipo || !status || !prioridade || !descricao) {
       alert("⚠️ Preencha todos os campos obrigatórios.");
       return;
     }
 
-    const { data, error } = await supabase
+    // Insert para visitante (id_solicitante = null + campos *_externo)
+    const { error } = await supabase
       .from('chamado')
       .insert([{
         id_solicitante: null,
@@ -110,22 +129,21 @@ document.addEventListener('DOMContentLoaded', function () {
         descricao_problema: descricao,
         data_hora_abertura: new Date().toISOString(),
         status_chamado: "Aberto"
-      }])
-      .select();
+      }]); // 🔹 sem .select() para não exigir policy de SELECT
 
     if (error) {
-      console.error("❌ Erro ao abrir chamado visitante:", error.message);
+      console.error("❌ Erro ao abrir chamado (visitante):", error.message);
       alert("❌ Erro ao abrir chamado. Veja o console.");
       return;
     }
 
-    console.log("Chamado visitante salvo:", data);
-
     alert("✅ Chamado aberto com sucesso!");
     form.reset();
+    if (listaArquivos) listaArquivos.innerHTML = "";
+    if (typeof fecharAnexo === 'function') fecharAnexo();
   });
 
-  // ⏬ Executa os carregamentos
+  // ---------- Start ----------
   carregarLocais();
   carregarMaquinas();
   carregarTiposManutencao();
