@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // 📎 Exibe nomes dos arquivos anexados
   window.mostrarNomeArquivos = function () {
     listaArquivos.innerHTML = "";
-
     if (inputArquivos.files.length > 0) {
       Array.from(inputArquivos.files).forEach(file => {
         const li = document.createElement('li');
@@ -53,55 +52,53 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-// 🔄 Carregar Máquinas
-async function carregarMaquinas() {
-  const selectMaquina = document.getElementById('maquina');
-  selectMaquina.innerHTML = '<option value="">Selecione</option>'; // ← CORRETO
+  // 🔄 Carregar Máquinas
+  async function carregarMaquinas() {
+    const selectMaquina = document.getElementById('maquina');
+    selectMaquina.innerHTML = '<option value="">Selecione</option>';
 
-  const { data, error } = await supabase
-    .from('maquina_dispositivo')
-    .select('id_maquina, nome_maquina')
-    .order('nome_maquina', { ascending: true });
+    const { data, error } = await supabase
+      .from('maquina_dispositivo')
+      .select('id_maquina, nome_maquina')
+      .order('nome_maquina', { ascending: true });
 
-  if (error) {
-    console.error("Erro ao carregar máquinas:", error.message);
-    return;
+    if (error) {
+      console.error("Erro ao carregar máquinas:", error.message);
+      return;
+    }
+
+    data.forEach(maquina => {
+      const option = document.createElement('option');
+      option.value = maquina.id_maquina;
+      option.textContent = maquina.nome_maquina;
+      selectMaquina.appendChild(option);
+    });
   }
 
-  data.forEach(maquina => {
-    const option = document.createElement('option');
-    option.value = maquina.id_maquina; // UUID correto
-    option.textContent = maquina.nome_maquina;
-    selectMaquina.appendChild(option);
-  });
-}
+  // 🔄 Carregar Tipos de Manutenção
+  async function carregarTiposManutencao() {
+    const selectTipo = document.getElementById('tipo');
+    selectTipo.innerHTML = '<option value="">Selecione</option>';
 
-// 🔄 Carregar Tipos de Manutenção
-async function carregarTiposManutencao() {
-  const selectTipo = document.getElementById('tipo');
-  selectTipo.innerHTML = '<option value="">Selecione</option>'; // ← CORRETO
+    const { data, error } = await supabase
+      .from('tipo_manutencao')
+      .select('id_tipo_manutencao, nome_tipo')
+      .order('nome_tipo', { ascending: true });
 
-  const { data, error } = await supabase
-    .from('tipo_manutencao')
-    .select('id_tipo_manutencao, nome_tipo')
-    .order('nome_tipo', { ascending: true });
+    if (error) {
+      console.error("Erro ao carregar tipos de manutenção:", error.message);
+      return;
+    }
 
-  if (error) {
-    console.error("Erro ao carregar tipos de manutenção:", error.message);
-    return;
+    data.forEach(tipo => {
+      const option = document.createElement('option');
+      option.value = tipo.id_tipo_manutencao;
+      option.textContent = tipo.nome_tipo;
+      selectTipo.appendChild(option);
+    });
   }
 
-  data.forEach(tipo => {
-    const option = document.createElement('option');
-    option.value = tipo.id_tipo_manutencao; // UUID
-    option.textContent = tipo.nome_tipo;
-    selectTipo.appendChild(option);
-  });
-}
-
-
-
-// ✅ Submit do formulário
+  // ✅ Submit do formulário
   form.addEventListener('submit', async function (event) {
     event.preventDefault();
 
@@ -112,23 +109,25 @@ async function carregarTiposManutencao() {
     const prioridade = document.getElementById('prioridade').value;
     const descricao = document.getElementById('descricao').value.trim();
 
-    const idUsuario = "null"; // mock fixo
+    if (!local || !maquina || !tipo || !prioridade || !descricao) {
+      alert("⚠️ Preencha todos os campos obrigatórios.");
+      return;
+    }
 
-    // 🟡 Primeiro, cria o chamado
-const { data, error } = await supabase
-  .from('chamado')
-  .insert([{
-    id_solicitante: null,
-    id_local: local,
-    id_maquina: maquina,
-    id_tipo_manutencao: tipo,
-    status_maquina: status,
-    prioridade: prioridade,
-    descricao_problema: descricao,
-    data_hora_abertura: new Date().toISOString(),
-    status_chamado: "Aberto"
-  }])
-
+    // Cria o chamado
+    const { data, error } = await supabase
+      .from('chamado')
+      .insert([{
+        id_solicitante: null, // TODO: quando tiver login, trocar
+        id_local: local,
+        id_maquina: maquina,
+        id_tipo_manutencao: tipo,
+        status_maquina: status,
+        prioridade: prioridade,
+        descricao_problema: descricao,
+        data_hora_abertura: new Date().toISOString(),
+        status_chamado: "Aberto"
+      }])
       .select();
 
     if (error) {
@@ -137,18 +136,15 @@ const { data, error } = await supabase
       return;
     }
 
-    const novoChamado = data[0];
-
-    // 🔵 Em seguida, envia os anexos (se houver)
-    await uploadAnexos(novoChamado.id_chamado, idUsuario);
+    // const novoChamado = data[0];
+    // 🚫 Desativado upload de anexos por enquanto
+    // await uploadAnexos(novoChamado.id_chamado, idUsuario);
 
     alert("✅ Chamado aberto com sucesso!");
     form.reset();
     listaArquivos.innerHTML = "";
     fecharAnexo();
   });
-
-
 
   // ⏬ Executa os carregamentos
   carregarLocais();
