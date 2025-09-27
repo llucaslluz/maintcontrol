@@ -130,7 +130,27 @@ O **Maint Control Voith** é um sistema web para **gestão de chamados de manute
 - **Anexo**: id, chamado, arquivo, usuário_upload.  
 - **Histórico_Ação**: id, chamado, usuário, tipo_ação, data.  
 - **Permissão / Categoria_Permissão**: controle de RBAC.  
-- **Status_Máquina**: id, máquina, status, data, chamado, usuário.  
+- **Status_Máquina**: id, máquina, status, data, chamado, usuário.
+
+---
+
+## 4.1 🗄️ Tabela de Entidades do Banco de Dados
+
+| Entidade             | Atributos Principais                                   | Finalidade                                                                 |
+|----------------------|--------------------------------------------------------|----------------------------------------------------------------------------|
+| **Usuário**          | id, nome, chapa, cpf, senha, cargo, email, telefone, ativo, id_categoria | Armazena dados de operadores, técnicos, supervisores e administradores.    |
+| **Categoria_Usuario**| id_categoria, nome_categoria, descricao_categoria      | Define os perfis de acesso (Operador, Técnico, Supervisor, ADM).           |
+| **Local**            | id_local, nome_local, descricao_local                  | Representa os setores/áreas da fábrica.                                    |
+| **Máquina_Dispositivo** | id_maquina, nome_maquina, modelo, num_serie, descricao, id_local, id_categoria_maquina | Cadastro das máquinas e dispositivos industriais.                          |
+| **Categoria_Maquina**| id_categoria_maquina, nome_categoria, descricao        | Classificação das máquinas (fixas, pontes, caldeiraria, elétrica).         |
+| **Chamado**          | id_chamado, descricao_problema, prioridade, status_chamado, status_maquina, data_abertura, data_fechamento, id_maquina, id_local, id_solicitante | Registro principal de solicitações de manutenção.                          |
+| **Atendimento_Chamado** | id_atendimento, id_chamado, id_tecnico, hora_inicio, hora_fim, descricao_andamento | Registro das ações feitas por técnicos em cada chamado.                    |
+| **Pendência**        | id_pendencia, id_chamado, descricao, status, data_criacao, id_criador, id_resolutor | Controle de pendências abertas durante o chamado.                          |
+| **Anexo**            | id_anexo, id_chamado, id_usuario_upload, nome_arquivo, tipo_arquivo, caminho, data_upload | Armazena fotos, vídeos e documentos ligados a chamados.                    |
+| **Histórico_Acao**   | id_historico, id_chamado, id_usuario, tipo_acao, descricao, data_acao | Log detalhado de todas as ações no sistema.                                |
+| **Permissao**        | id_permissao, nome_permissao, descricao_permissao      | Define permissões específicas (RBAC).                                      |
+| **Categoria_Permissao** | id_categoria, id_permissao                           | Associação N:N entre categorias de usuários e permissões.                  |
+| **Status_Maquina**   | id_status, id_maquina, status, data_status, id_usuario, id_chamado | Histórico detalhado dos estados de cada máquina (rodando, parada, etc.).   |
 
 ---
 
