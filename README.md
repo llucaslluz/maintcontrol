@@ -61,6 +61,32 @@ O **Maint Control Voith** é um sistema web para **gestão de chamados de manute
 
 ---
 
+## 2.1 📋 Tabela de Telas
+
+| Tela                         | Objetivo                                                           | Perfis com Acesso                          |
+|------------------------------|-------------------------------------------------------------------|-------------------------------------------|
+| **Login**                   | Autenticação via chapa/senha e acesso visitante                   | Todos (Operador, Técnico, Supervisor, ADM, Visitante) |
+| **Abertura de Chamado (Visitante)** | Permite abrir chamado sem login completo                          | Visitante, Dashboard Operacional          |
+| **Abertura de Chamado (Usuário Logado)** | Formulário completo com dados preenchidos automaticamente          | Operador, Técnico, Supervisor, ADM        |
+| **Dashboard Operador**      | Visão dos chamados próprios                                       | Operador                                  |
+| **Dashboard Técnico**       | Visão de todos os chamados + ações rápidas                       | Técnico                                   |
+| **Dashboard Supervisor/ADM**| Visão completa de chamados + acessos à gestão e relatórios        | Supervisor, ADM                           |
+| **Dashboard Operacional**   | Visão restrita para chão de fábrica                              | Terminal de Operação / Operadores locais  |
+| **Dashboard Manutenção**    | Visão detalhada para técnicos em terminais compartilhados         | Técnicos, Supervisores                    |
+| **Listagem de Chamados**    | Consulta de chamados com filtros avançados                       | Operador (seus), Técnico, Supervisor, ADM |
+| **Detalhe do Chamado**      | Exibe todas as informações do chamado e histórico                 | Operador (visualiza), Técnico, Supervisor, ADM |
+| **Gestão de Usuários**      | Cadastro/edição de usuários e permissões                         | Supervisor, ADM                           |
+| **Gestão de Locais**        | Cadastro/edição de setores/locais                                | Supervisor, ADM                           |
+| **Gestão de Máquinas/Dispositivos** | Cadastro/edição de máquinas e dispositivos                      | Supervisor, ADM                           |
+| **Gestão de Tipos de Manutenção**   | Cadastro/edição de tipos de manutenção                          | Supervisor, ADM                           |
+| **Gestão de Permissões**    | Gerenciamento de permissões (RBAC)                               | ADM (ou Supervisor se definido)           |
+| **Relatórios Gerenciais**   | Geração de relatórios estatísticos e métricas                    | Técnico (básicos), Supervisor, ADM        |
+| **Histórico de Auditoria**  | Registro completo de todas as ações no sistema                   | Supervisor, ADM                           |
+| **Meu Perfil**              | Atualização de dados pessoais                                    | Todos os usuários logados                 |
+| **Mapa da Planta**          | Visão gráfica interativa de máquinas, pontes/pórticos e setores  | Operador, Técnico, Supervisor, ADM        |
+
+---
+
 ## 3. Regras de Negócio
 
 1. **Chamados**  
