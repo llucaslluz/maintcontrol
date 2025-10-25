@@ -113,13 +113,14 @@
       <fieldset>
         <legend>Identificação</legend>
         <label for="nome">Nome:</label>
-        <input type="text" id="nome" value="Ismael." disabled>
+        <input type="text" id="nome" value="" disabled>
 
         <label for="chapa">Chapa:</label>
-        <input type="text" id="chapa" value="123456789" disabled>
+        <input type="text" id="chapa" value="" disabled>
 
         <label for="funcao">Função:</label>
-        <input type="text" id="funcao" value="Supervisor Geral" disabled>
+        <input type="text" id="funcao" value="" disabled>
+
       </fieldset>
 
       <fieldset>
@@ -188,14 +189,16 @@
     lucide.createIcons();
   </script>
 
-<!-- 1. SDK do Supabase (precisa vir antes de tudo) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<!-- 2. Criação do client (usa a SDK acima) -->
+<!-- 1. SDK do Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- 2. Client do seu projeto -->
 <script src="/js/supabaseClient.js"></script>
 
-<!-- 3. Código principal que usa o supabase -->
-
+<!-- 3. Seus scripts da página (agora com supabase pronto) -->
+<script defer src="/js/sidebar.js"></script>
+<script defer src="/js/mobileMenu.js"></script>
+<script defer src="/js/uploadAnexo.js"></script>
+<script defer src="/js/abrirChamadoUsuario.js"></script>
 
 </body>
 </html>
