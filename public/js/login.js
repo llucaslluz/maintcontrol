@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('loginForm');
   const btn = form.querySelector('button[type="submit"]');
 
-  // Rotas por categoria (ajuste se quiser)
+  // Rotas por categoria (ajuste conforme suas páginas)
   const ROUTES = {
     'Supervisor': '/DashboardSupervisorAdm.html',
     'Técnico': '/DashboardTecnico.html',
@@ -13,10 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     'DEFAULT': '/DashboardSupervisorAdm.html'
   };
 
-  // Cache de categorias (id -> nome)
+  // cache id_categoria -> nome_categoria
   const categoryMap = {};
 
-  // Carrega categorias uma vez (para sabermos para onde redirecionar)
   async function preloadCategories() {
     try {
       const { data, error } = await window.supabase
@@ -30,70 +29,70 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   preloadCategories();
 
-  // Normaliza strings (remove acentos e caixa)
-  const normalize = (s) =>
-    (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-
-  // Extrai o primeiro nome a partir do nome completo
-  const firstToken = (s) => (s || '').trim().split(/\s+/)[0];
+  // util: mantém só dígitos (para cpf)
+  const onlyDigits = (s) => (s || '').replace(/\D+/g, '');
 
   async function loginHandler(event) {
     event.preventDefault();
+    const loginChapa = document.getElementById('registro').value.trim(); // agora é a CHAPA
+    const senhaCpfRaw = document.getElementById('senha').value.trim();  // CPF (com ou sem máscara)
+    const senhaCpf = onlyDigits(senhaCpfRaw);
 
-    const campoLoginPrimeiroNome = document.getElementById('registro').value.trim();
-    const campoSenhaChapa = document.getElementById('senha').value.trim();
-
-    if (!campoLoginPrimeiroNome || !campoSenhaChapa) {
-      alert('❌ Preencha o primeiro nome e o número de registro.');
+    if (!loginChapa || !senhaCpf) {
+      alert('❌ Preencha a CHAPA e o CPF.');
       return;
     }
 
     btn.disabled = true;
 
     try {
-      // 1) Busca candidatos pelo nome começando com o primeiro nome digitado (case-insensitive)
-// 1) Busca direto pela CHAPA (senha digitada)
-const { data: candidatos, error } = await window.supabase
-  .from('usuario')
-  .select('id_usuario, nome, chapa, ativo, id_categoria')
-  .eq('chapa', campoSenhaChapa);  // <- usa a chapa (senha) como filtro único
+      // 1) Busca usuário pela CHAPA (única)
+      const { data: usuarios, error } = await window.supabase
+        .from('usuario')
+        .select('id_usuario, nome, chapa, ativo, id_categoria, cpf')
+        .eq('chapa', loginChapa)
+        .limit(1);
 
-if (error) {
-  console.error(error);
-  alert('❌ Erro ao validar login. Tente novamente.');
-  return;
-}
+      if (error) {
+        console.error(error);
+        alert('❌ Erro ao validar login. Tente novamente.');
+        return;
+      }
 
-if (!candidatos || candidatos.length === 0) {
-  alert('❌ Usuário não encontrado.');
-  return;
-}
+      if (!usuarios || usuarios.length === 0) {
+        alert('❌ Usuário não encontrado (CHAPA inválida).');
+        return;
+      }
 
-// 2) Confirma o primeiro nome bate (ignorando acentos e caixa)
-const alvo = candidatos.find(u =>
-  normalize(firstToken(u.nome)) === normalize(campoLoginPrimeiroNome)
-);
+      const u = usuarios[0];
 
-if (!alvo) {
-  alert('❌ Nome ou número de registro inválidos.');
-  return;
-}
+      // 2) Compara CPF (sanitizado)
+      const dbCpf = onlyDigits(u.cpf || '');
+      if (!dbCpf || dbCpf !== senhaCpf) {
+        alert('❌ CPF incorreto.');
+        return;
+      }
 
-      // 3) Descobrir nome da categoria (se existir)
-      const categoriaNome = alvo.id_categoria ? (categoryMap[alvo.id_categoria] || null) : null;
+      if (u.ativo === false) {
+        alert('⚠️ Usuário inativo. Fale com o administrador.');
+        return;
+      }
 
-      // 4) Guarda sessão mínima
+      // 3) nome da categoria (se carregado)
+      const categoriaNome = u.id_categoria ? (categoryMap[u.id_categoria] || null) : null;
+
+      // 4) guarda sessão local
       localStorage.setItem('mcv_user', JSON.stringify({
-        id: alvo.id_usuario,
-        nome: alvo.nome,
-        chapa: alvo.chapa,
-        id_categoria: alvo.id_categoria || null,
+        id: u.id_usuario,
+        nome: u.nome,
+        chapa: u.chapa,
+        id_categoria: u.id_categoria || null,
         categoria_nome: categoriaNome
       }));
 
       alert('✅ Login realizado com sucesso!');
 
-      // 5) Redireciona por categoria (Supervisor/Técnico já configurados)
+      // 5) redireciona
       const destino = categoriaNome && ROUTES[categoriaNome] ? ROUTES[categoriaNome] : ROUTES.DEFAULT;
       window.location.href = destino;
 
