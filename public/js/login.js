@@ -52,33 +52,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // 1) Busca candidatos pelo nome começando com o primeiro nome digitado (case-insensitive)
-      const { data: candidatos, error } = await window.supabase
-        .from('usuario')
-        .select('id_usuario, nome, chapa, ativo, id_categoria')
-        .ilike('nome', `${campoLoginPrimeiroNome}%`);
+// 1) Busca direto pela CHAPA (senha digitada)
+const { data: candidatos, error } = await window.supabase
+  .from('usuario')
+  .select('id_usuario, nome, chapa, ativo, id_categoria')
+  .eq('chapa', campoSenhaChapa);  // <- usa a chapa (senha) como filtro único
 
-      if (error) throw error;
+if (error) {
+  console.error(error);
+  alert('❌ Erro ao validar login. Tente novamente.');
+  return;
+}
 
-      if (!candidatos || candidatos.length === 0) {
-        alert('❌ Usuário não encontrado.');
-        return;
-      }
+if (!candidatos || candidatos.length === 0) {
+  alert('❌ Usuário não encontrado.');
+  return;
+}
 
-      // 2) Filtra: primeiro nome deve bater (ignorando acentos/caixa) e chapa == senha digitada
-      const alvo = candidatos.find(u =>
-        normalize(firstToken(u.nome)) === normalize(campoLoginPrimeiroNome) &&
-        String(u.chapa) === String(campoSenhaChapa)
-      );
+// 2) Confirma o primeiro nome bate (ignorando acentos e caixa)
+const alvo = candidatos.find(u =>
+  normalize(firstToken(u.nome)) === normalize(campoLoginPrimeiroNome)
+);
 
-      if (!alvo) {
-        alert('❌ Nome ou número de registro inválidos.');
-        return;
-      }
-
-      if (alvo.ativo === false) {
-        alert('⚠️ Usuário inativo. Fale com o administrador.');
-        return;
-      }
+if (!alvo) {
+  alert('❌ Nome ou número de registro inválidos.');
+  return;
+}
 
       // 3) Descobrir nome da categoria (se existir)
       const categoriaNome = alvo.id_categoria ? (categoryMap[alvo.id_categoria] || null) : null;
