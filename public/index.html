@@ -3,66 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- Ícone -->
   <link rel="icon" href="/images/V-sem-fundo.png" type="image/png" />
-
-  <!-- Título -->
   <title>MaintControl</title>
 
   <!-- Estilos -->
   <link rel="stylesheet" href="/css/styles.css" />
   <link rel="stylesheet" href="/css/loader.css" />
 
-  <!-- Scripts -->
+  <!-- Scripts: ORDEM IMPORTA! -->
+  <!-- 1) Supabase CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 2) Seu client (mesmo case da pasta/arquivo no servidor) -->
+  <script defer src="/js/supabaseClient.js"></script>
+  <!-- 3) loader e login por último -->
   <script defer src="/js/loader.js"></script>
   <script defer src="/js/login.js"></script>
-
 </head>
 <body>
-
-
-    <!-- Loader personalizado VOITH -->
-<div id="voith-loader" class="voith-loader-overlay">
-  <div class="voith-loader-content">
-    <img src="/images/rotor-voith.png" alt="Rotor" class="rotor-girando" />
-    <img src="/images/Voith-sem-fundo.png" alt="VOITH" class="voith-logo" />
-  </div>
-</div>
-
-    <div class="login-box">
-        <img src="/images/Voith-sem-fundo.png" alt="Logo" class="logo">
-        <h2>MaintControl</h2>
-
-        <form id="loginForm">
-            <label for="registro">CHAPA:</label>
-            <input type="text" id="registro" name="registro" placeholder="Ex: 1234567" required>
-
-            <label for="senha">CPF / SENHA INICIAL:</label>
-            <input type="password" id="senha" name="senha" placeholder="Senha inicial é seu CPF" required>
-
-            <p class="info">
-                Não tem login?
-                <a href="/AbrirChamadoVisitante.html">Abrir Chamado como Visitante</a>
-            </p>
-
-            <button type="submit">Entrar</button>
-
-            <div class="links-uteis">
-                <a href="#">Página de Ajuda</a> |
-                <a href="#">Contato</a> |
-                <a href="#">FAQ</a>
-            </div>
-        </form>
-
-        <footer>
-            <p>by <br><strong>Lucas Luz</strong></p>
-        </footer>
+  <!-- Loader -->
+  <div id="voith-loader" class="voith-loader-overlay">
+    <div class="voith-loader-content">
+      <img src="/images/rotor-voith.png" alt="Rotor" class="rotor-girando" />
+      <img src="/images/Voith-sem-fundo.png" alt="VOITH" class="voith-logo" />
     </div>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script src="/js/supabaseClient.js"></script> <!-- Caminho do seu arquivo JS -->
+  <div class="login-box">
+    <img src="/images/Voith-sem-fundo.png" alt="Logo" class="logo">
+    <h2>MaintControl</h2>
 
+    <form id="loginForm">
+      <label for="registro">CHAPA:</label>
+      <input type="text" id="registro" name="registro" placeholder="Ex: 1234567" required>
 
+      <label for="senha">CPF / SENHA INICIAL:</label>
+      <input type="password" id="senha" name="senha" placeholder="Senha inicial é seu CPF" required>
+
+      <p class="info">
+        Não tem login?
+        <a href="/AbrirChamadoVisitante.html">Abrir Chamado como Visitante</a>
+      </p>
+
+      <button type="submit">Entrar</button>
+
+      <div class="links-uteis">
+        <a href="#">Página de Ajuda</a> |
+        <a href="#">Contato</a> |
+        <a href="#">FAQ</a>
+      </div>
+    </form>
+
+    <footer>
+      <p>by <br><strong>Lucas Luz</strong></p>
+    </footer>
+  </div>
 </body>
 </html>
