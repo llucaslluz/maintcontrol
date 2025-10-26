@@ -102,14 +102,14 @@ const { data, error } = await supabase
     tbody.innerHTML = rows.map(renderLinhaChamado).join("");
 
     // clique "Ver Detalhe"
-    tbody.addEventListener('click', (ev) => {
-      const btn = ev.target.closest('.btn-detalhe');
-      if (!btn) return;
-      const id = btn.getAttribute('data-id');
-      // TODO: quando existir página de detalhe:
-      location.href = `/ChamadoDetalhe.html?id=${id}`;
-      console.log('abrir detalhe', id);
-    }, { once: true });
+// ... dentro de atualizarChamados(), depois de montar tbody.innerHTML
+tbody.addEventListener('click', (ev) => {
+  const btn = ev.target.closest('.btn-detalhe');
+  if (!btn) return;
+  const id = btn.getAttribute('data-id');
+  // abre a página de detalhes com o id na URL
+  location.href = `/DetalhesChamado.html?id=${encodeURIComponent(id)}`;
+}, { once: true });
   }
 
   // ---------- Histórico ----------
