@@ -5,6 +5,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const fmtDate = (d) => new Date(d).toLocaleString("pt-BR");
   const safe = (s) => (s ?? '').toString();
 
+  const isEmergencia = (ch) =>
+  ch?.emergencia === true ||
+  (typeof ch?.descricao_problema === 'string' && ch.descricao_problema.includes('🚨'));
+
+
   // ---------- KPIs ----------
   async function contarChamadosPorStatus() {
     const { data, error } = await supabase
@@ -71,7 +76,7 @@ const { data, error } = await supabase
   }
 
   function renderLinhaChamado(ch) {
-    const ehEmerg = ch.emergencia === true;
+    const ehEmerg = isEmergencia(ch);
     const badgeEmg = ehEmerg ? '<span class="tag-emergencia">🚨 Emergência</span>' : "";
 
     const nomeSolic  = ch.solicitante?.nome || ch.nome_solicitante_externo || "—";

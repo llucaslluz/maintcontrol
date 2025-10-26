@@ -1,4 +1,8 @@
-// ---------- Modal ----------
+// =======================
+//  Botão de EMERGÊNCIA
+// =======================
+
+// ---- Modal ----
 function abrirModalEmergencia() {
   document.getElementById('modal-emergencia')?.classList.remove('hidden');
 }
@@ -6,7 +10,7 @@ function fecharModalEmergencia() {
   document.getElementById('modal-emergencia')?.classList.add('hidden');
 }
 
-// ---------- Util: aguarda o Supabase existir ----------
+// ---- Utils ----
 async function waitForSupabase(maxMs = 5000) {
   const start = Date.now();
   while (!window.supabase) {
@@ -15,15 +19,18 @@ async function waitForSupabase(maxMs = 5000) {
   }
   return window.supabase;
 }
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('mcv_user') || 'null'); }
+  catch { return null; }
+}
 
-// ---------- Carregar Locais no <select id="local-emergencia"> ----------
+// ---- Carrega locais no select do modal ----
 async function carregarLocaisEmergencia() {
   try {
     await waitForSupabase();
     const select = document.getElementById("local-emergencia");
     if (!select) return;
 
-    // placeholder
     select.innerHTML = '<option value="">Selecione</option>';
 
     const { data, error } = await supabase
@@ -36,7 +43,7 @@ async function carregarLocaisEmergencia() {
       return;
     }
 
-    data?.forEach(loc => {
+    (data || []).forEach(loc => {
       const op = document.createElement("option");
       op.value = loc.id_local;
       op.textContent = loc.nome_local;
@@ -47,7 +54,7 @@ async function carregarLocaisEmergencia() {
   }
 }
 
-// ---------- Enviar chamado de emergência ----------
+// ---- Envia chamado de emergência ----
 async function enviarEmergencia() {
   try {
     await waitForSupabase();
@@ -58,22 +65,21 @@ async function enviarEmergencia() {
       return;
     }
 
-    // Insere como um chamado normal, marcado na descrição e com prioridade alta
-    const { error } = await supabase
-      .from("chamado")
-      .insert([{
-        id_solicitante: null,                 // sem login
-        id_local: idLocal,
-        id_maquina: null,                     // se quiser vincular máquina depois, dá pra editar
-        id_tipo_manutencao: null,             // idem
-        descricao_problema: "🚨 Chamado de Emergência",
-        prioridade: "alta",
-        status_maquina: "Parada",
-        status_chamado: "Aberto",
-        data_hora_abertura: new Date().toISOString()
-        // se você tiver adicionado a coluna boolean 'emergencia', pode incluir:
-        // , emergencia: true
-      }]); // sem .select() para não exigir policy de SELECT
+    const user = getUser(); // se estiver logado, registra como solicitante
+    const payload = {
+      id_solicitante: user?.id || null,
+      id_local: idLocal,
+      id_maquina: null,
+      id_tipo_manutencao: null,
+      descricao_problema: "🚨 Chamado de Emergência",
+      prioridade: "Alta",
+      status_maquina: "Parada",
+      status_chamado: "Aberto",
+      data_hora_abertura: new Date().toISOString(),
+      emergencia: true
+    };
+
+    const { error } = await supabase.from("chamado").insert([payload]); // sem .select()
 
     if (error) {
       console.error("Erro ao abrir emergência:", error.message);
@@ -84,11 +90,11 @@ async function enviarEmergencia() {
     alert("🚨 Chamado de emergência enviado com sucesso!");
     fecharModalEmergencia();
 
-    // Pede para a página atualizar cards e tabela, se as funções existirem
+    // pede atualização para o dashboard (se existir)
     if (typeof window.atualizarCards === "function") window.atualizarCards();
     if (typeof window.atualizarChamados === "function") window.atualizarChamados();
 
-    // ou dispara um evento para quem quiser escutar
+    // evento para quem quiser escutar
     document.dispatchEvent(new CustomEvent("chamado-emergencia-aberto"));
   } catch (e) {
     console.error("Falha ao enviar emergência:", e.message);
@@ -96,10 +102,5 @@ async function enviarEmergencia() {
   }
 }
 
-// ---------- Exportar (placeholder) ----------
-function exportarTabela() {
-  alert('FAZER DEPOIS: exportação para Excel/PDF');
-}
-
-// ---------- Init ----------
+// ---- Init ----
 document.addEventListener("DOMContentLoaded", carregarLocaisEmergencia);
