@@ -108,7 +108,7 @@ tbody.addEventListener('click', (ev) => {
   if (!btn) return;
   const id = btn.getAttribute('data-id');
   // abre a página de detalhes com o id na URL
-  location.href = `/DetalheChamado.html?id=${encodeURIComponent(id)}`;
+  location.href = `/DetalheChamados.html?id=${encodeURIComponent(id)}`;
 }, { once: true });
   }
 
