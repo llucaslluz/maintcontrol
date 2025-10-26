@@ -107,7 +107,7 @@ const { data, error } = await supabase
       if (!btn) return;
       const id = btn.getAttribute('data-id');
       // TODO: quando existir página de detalhe:
-      // location.href = `/ChamadoDetalhe.html?id=${id}`;
+      location.href = `/ChamadoDetalhe.html?id=${id}`;
       console.log('abrir detalhe', id);
     }, { once: true });
   }
