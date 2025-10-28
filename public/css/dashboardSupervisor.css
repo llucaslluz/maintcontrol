@@ -235,3 +235,5 @@ td.acoes .pill-you {
 .link-id { color:#0b74d0; text-decoration:none; font-weight:700; }
 .link-id:hover { text-decoration:underline; }
 
+.card-status.active { outline: 2px solid #2e4575; box-shadow: 0 0 0 3px rgba(46,69,117,.15) inset; }
+

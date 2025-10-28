@@ -1,45 +1,103 @@
 document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 Dashboard Supervisor iniciado");
 
-  // ---------- Helpers (UMA VEZ SÓ) ----------
-  const getUserSessao = () => {
-    try { return JSON.parse(localStorage.getItem('mcv_user')) || null; }
-    catch { return null; }
-  };
+  // ---------- Estado / Helpers (únicas definições) ----------
+  let filtroAtual = null;           // { tipo: 'status'|'pendencia', valor?: string }
+  let pendentesSet = new Set();     // ids de chamados com pendência aberta
+
   const safe     = (s) => (s ?? '').toString();
-  const idCurto  = (id) => (id ? String(id).substring(0, 6) : "??????");
-  const resumir  = (txt, n = 90) => {
-    const s = (txt ?? "").toString().trim();
-    return s.length > n ? s.slice(0, n - 1) + "…" : s;
-  };
+  const idCurto  = (uuid) => String(uuid).slice(0, 6);
+  const resumir  = (txt, n=90) => (txt ? (txt.length>n ? txt.slice(0,n-1)+'…' : txt) : '—');
   const fmtDate  = (d) => new Date(d).toLocaleString("pt-BR");
+  const getUserSessao = () => { try { return JSON.parse(localStorage.getItem('mcv_user')) || null; } catch { return null; } };
   const isEmergencia = (ch) =>
     ch?.emergencia === true ||
     (typeof ch?.descricao_problema === 'string' && ch.descricao_problema.includes('🚨'));
 
-  // ---------- KPIs ----------
-  async function contarChamadosPorStatus() {
-    const { data, error } = await supabase
+  // ---------- KPIs (Status + Pendências abertas) ----------
+  async function contarKPIs() {
+    // 1) Status
+    const { data: chs, error: errCh } = await supabase
       .from("chamado")
-      .select("status_chamado, emergencia");
+      .select("id_chamado, status_chamado, emergencia");
 
-    if (error) { console.error("Erro ao contar chamados:", error.message); return null; }
+    if (errCh) { console.error("Erro ao contar chamados:", errCh.message); return null; }
 
-    const cont = { "Aberto": 0, "Em Andamento": 0, "Concluído": 0, "Com Pendência": 0, _emergencias: 0 };
-    for (const ch of data) {
+    const cont = {
+      "Aberto": 0,
+      "Em Andamento": 0,
+      "Concluído": 0,
+      "Com Pendência": 0,  // se você usar esse status diretamente no chamado
+      _emergencias: 0,
+      _pendentes: 0        // contagem por chamado com pendência aberta
+    };
+
+    for (const ch of chs) {
       if (cont[ch.status_chamado] !== undefined) cont[ch.status_chamado]++;
       if (ch.emergencia === true) cont._emergencias++;
     }
+
+    // 2) Pendências abertas (qualquer status diferente de resolvida/fechada/concluída)
+    const { data: pends, error: errP } = await supabase
+      .from("pendencia")
+      .select("id_chamado, status_pendencia");
+
+    if (errP) { console.error("Erro ao contar pendências:", errP.message); return cont; }
+
+    const abertas = new Set();
+    for (const p of pends) {
+      const st = (p.status_pendencia || "Aberta").toLowerCase();
+      if (st !== "resolvida" && st !== "fechada" && st !== "concluída" && st !== "concluida") {
+        abertas.add(p.id_chamado);
+      }
+    }
+    cont._pendentes = abertas.size;
+    pendentesSet = abertas;
+
     return cont;
   }
 
   async function atualizarCards() {
-    const cont = await contarChamadosPorStatus();
+    const cont = await contarKPIs();
     if (!cont) return;
     document.getElementById("card-abertos").textContent    = cont["Aberto"] || 0;
     document.getElementById("card-andamento").textContent  = cont["Em Andamento"] || 0;
     document.getElementById("card-concluidos").textContent = cont["Concluído"] || 0;
-    document.getElementById("card-pendentes").textContent  = cont["Com Pendência"] || 0;
+    document.getElementById("card-pendentes").textContent  = cont._pendentes || 0;
+  }
+
+  // ---------- Filtro por cards ----------
+  function passaNoFiltro(ch) {
+    if (!filtroAtual) return true;
+
+    if (filtroAtual.tipo === 'status') {
+      return ch.status_chamado === filtroAtual.valor;
+    }
+    if (filtroAtual.tipo === 'pendencia') {
+      return pendentesSet.has(ch.id_chamado);
+    }
+    return true;
+  }
+
+  function marcarCardAtivo(id) {
+    document.querySelectorAll('.card-status').forEach(el => el.classList.remove('active'));
+    if (id) document.getElementById(id)?.classList.add('active');
+  }
+
+  function setFiltro(novo) {
+    const igual = filtroAtual && filtroAtual.tipo === novo?.tipo && filtroAtual.valor === novo?.valor;
+    filtroAtual = igual ? null : novo;
+
+    marcarCardAtivo(
+      igual ? null :
+      novo?.tipo === 'status'   && novo?.valor === 'Aberto'        ? 'kpi-abertos'   :
+      novo?.tipo === 'status'   && novo?.valor === 'Em Andamento'  ? 'kpi-andamento' :
+      novo?.tipo === 'status'   && novo?.valor === 'Concluído'     ? 'kpi-concluidos':
+      novo?.tipo === 'pendencia'                                   ? 'kpi-pendentes' :
+      null
+    );
+
+    atualizarChamados();
   }
 
   // ---------- Tabela ----------
@@ -66,14 +124,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         chapa_solicitante_externo
       `)
       .order("data_hora_abertura", { ascending: false })
-      .limit(20);
+      .limit(50);
 
     if (errCham) {
       console.error("Erro ao listar chamados:", errCham.message);
       return;
     }
 
-    // 2) Buscar quem está atendendo (atendimentos abertos)
+    // 2) Quem está atendendo (abertos)
     const ids = (chamados || []).map(c => c.id_chamado);
     let atendimentosAbertos = [];
     if (ids.length) {
@@ -94,7 +152,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       else console.error("Erro ao buscar atendimentos:", errAtd.message);
     }
 
-    // 3) Mapear último atendimento em aberto por chamado
+    // 3) Mapear último atendimento aberto por chamado
     const atendimentoMap = {};
     for (const a of atendimentosAbertos) {
       if (!atendimentoMap[a.id_chamado]) atendimentoMap[a.id_chamado] = a;
@@ -104,7 +162,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const tbody = document.getElementById("tabela-chamados");
     if (!tbody) return;
 
-    tbody.innerHTML = (chamados || []).map(ch => {
+    const me = getUserSessao();
+    const visiveis = (chamados || []).filter(passaNoFiltro);
+
+    tbody.innerHTML = visiveis.map(ch => {
       const ehEmerg = isEmergencia(ch);
       const badgeEmg = ehEmerg ? '<span class="tag-emergencia">🚨 Emergência</span>' : "";
 
@@ -117,7 +178,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? `${atd.tecnico.nome}${atd.tecnico.chapa ? " ("+atd.tecnico.chapa+")" : ""}`
         : "—";
 
-      const me = getUserSessao();
       const euAtendendo = me && atd?.tecnico?.chapa && String(me.chapa) === String(atd.tecnico.chapa);
 
       let botoes = `<button class="btn-detalhe" data-action="detalhe" data-id="${ch.id_chamado}">Ver Detalhe</button>`;
@@ -215,7 +275,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     ).join("");
   }
 
-  // ---------- Exports p/ botão de emergência ----------
+  // ---------- Listeners dos cards (filtros) ----------
+  document.getElementById('kpi-abertos')   ?.addEventListener('click', () => setFiltro({ tipo:'status',   valor:'Aberto' }));
+  document.getElementById('kpi-andamento') ?.addEventListener('click', () => setFiltro({ tipo:'status',   valor:'Em Andamento' }));
+  document.getElementById('kpi-concluidos')?.addEventListener('click', () => setFiltro({ tipo:'status',   valor:'Concluído' }));
+  document.getElementById('kpi-pendentes') ?.addEventListener('click', () => setFiltro({ tipo:'pendencia' }));
+
+  // ---------- Expostos p/ botão de emergência ----------
   window.atualizarCards = atualizarCards;
   window.atualizarChamados = atualizarChamados;
   document.addEventListener("chamado-emergencia-aberto", async () => {
