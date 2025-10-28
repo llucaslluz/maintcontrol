@@ -84,7 +84,7 @@ const { data, error } = await supabase
 
     return `
       <tr class="${ehEmerg ? 'chamado-emergencia' : ''}">
-        <td>#${ch.id_chamado}</td>
+        <td><strong>#${ch.id_chamado ? ch.id_chamado.substring(0, 6) : '??????'}</strong></td>
         <td>${safe(ch.maquina?.nome_maquina) || '-'}</td>
         <td>${safe(ch.status_chamado)} ${badgeEmg}</td>
         <td>${safe(ch.prioridade)}</td>
