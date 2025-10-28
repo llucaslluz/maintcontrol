@@ -1,9 +1,9 @@
 # 📑 Maint Control Voith  
 **Versão:** 2.0  
 
-site: https://www.maintcontrol.com.br/
-login para navegar: "8016913"
-Senha: "01234567890"
+- Site: https://www.maintcontrol.com.br/
+- Login para navegar: "8016913"
+- Senha: "01234567890"
 
 ---
 
