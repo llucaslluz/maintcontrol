@@ -2,6 +2,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log("🚀 Dashboard Supervisor iniciado");
 
   // ---------- Helpers ----------
+
+  function getUserSessao() {
+  try { return JSON.parse(localStorage.getItem('mcv_user')) || null; }
+  catch { return null; }
+}
+const safe = (s) => (s ?? '').toString();
+const idCurto = (uuid) => String(uuid).slice(0, 6);
+const resumir = (txt, n=90) => (txt ? (txt.length>n ? txt.slice(0,n-1)+'…' : txt) : '—');
+
+const isEmergencia = (ch) =>
+  ch?.emergencia === true ||
+  (typeof ch?.descricao_problema === 'string' && ch.descricao_problema.includes('🚨'));
+
   const fmtDate = (d) => new Date(d).toLocaleString("pt-BR");
   const safe = (s) => (s ?? '').toString();
 
@@ -112,13 +125,109 @@ function renderLinhaChamado(ch) {
 }
 
 async function atualizarChamados() {
-  const rows = await listarChamadosRecentes();
+  // 1) Buscar chamados
+  const { data: chamados, error: errCham } = await supabase
+    .from("chamado")
+    .select(`
+      id_chamado,
+      descricao_problema,
+      prioridade,
+      status_chamado,
+      status_maquina,
+      emergencia,
+      data_hora_abertura,
+      local:local (nome_local),
+      maquina:maquina_dispositivo (nome_maquina),
+      tipo:tipo_manutencao (nome_tipo),
+      solicitante:usuario!chamado_id_solicitante_fkey (nome, chapa),
+      nome_solicitante_externo,
+      chapa_solicitante_externo
+    `)
+    .order("data_hora_abertura", { ascending: false })
+    .limit(20);
+
+  if (errCham) {
+    console.error("Erro ao listar chamados:", errCham.message);
+    return;
+  }
+
+  // 2) Buscar “quem está atendendo” para esses chamados
+  const ids = (chamados || []).map(c => c.id_chamado);
+  let atendimentosAbertos = [];
+  if (ids.length) {
+    const { data: atds, error: errAtd } = await supabase
+      .from("atendimento_chamado")
+      .select(`
+        id_atendimento,
+        id_chamado,
+        hora_inicio_atendimento,
+        hora_fim_atendimento,
+        tecnico:usuario!atendimento_chamado_id_tecnico_fkey (id_usuario, nome, chapa)
+      `)
+      .in("id_chamado", ids)
+      .is("hora_fim_atendimento", null)       // só os que estão em atendimento
+      .order("hora_inicio_atendimento", { ascending: false });
+
+    if (errAtd) {
+      console.error("Erro ao buscar atendimentos:", errAtd.message);
+    } else {
+      atendimentosAbertos = atds || [];
+    }
+  }
+
+  // 3) Montar um map { id_chamado -> atendimento mais recente em aberto }
+  const atendimentoMap = {};
+  for (const a of atendimentosAbertos) {
+    if (!atendimentoMap[a.id_chamado]) {
+      atendimentoMap[a.id_chamado] = a; // já veio ordenado desc
+    }
+  }
+
+  // 4) Render
   const tbody = document.getElementById("tabela-chamados");
   if (!tbody) return;
 
-  tbody.innerHTML = rows.map(renderLinhaChamado).join("");
+  tbody.innerHTML = (chamados || []).map(ch => {
+    const ehEmerg = isEmergencia(ch);
+    const badgeEmg = ehEmerg ? '<span class="tag-emergencia">🚨 Emergência</span>' : "";
 
-  // Delegação de eventos para os botões da tabela
+    const nomeSolic  = ch.solicitante?.nome || ch.nome_solicitante_externo || "—";
+    const chapaSolic = ch.solicitante?.chapa || ch.chapa_solicitante_externo || "—";
+    const solicitanteFmt = `${nomeSolic}${chapaSolic && chapaSolic !== "—" ? " ("+chapaSolic+")" : ""}`;
+
+    const atd = atendimentoMap[ch.id_chamado]; // se existir, alguém está atendendo
+    const tecnicoAtualFmt = atd?.tecnico?.nome
+      ? `${atd.tecnico.nome}${atd.tecnico.chapa ? " ("+atd.tecnico.chapa+")" : ""}`
+      : "—";
+
+    const me = getUserSessao();
+    const euAtendendo = me && atd?.tecnico?.chapa && String(me.chapa) === String(atd.tecnico.chapa);
+
+    // botões limpos
+    let botoes = `
+      <button class="btn-detalhe" data-action="detalhe" data-id="${ch.id_chamado}">Ver Detalhe</button>
+    `;
+    if (ch.status_chamado === "Aberto") {
+      botoes += `<button class="btn-atender" data-action="atender" data-id="${ch.id_chamado}">Atender</button>`;
+    } else if (ch.status_chamado === "Em Andamento" && euAtendendo) {
+      botoes += `<span class="pill-you">Em atendimento (você)</span>`;
+    }
+
+    return `
+      <tr class="${ehEmerg ? 'chamado-emergencia' : ''}">
+        <td><a href="/DetalheChamados.html?id=${encodeURIComponent(ch.id_chamado)}" class="link-id">#${idCurto(ch.id_chamado)}</a></td>
+        <td>${safe(ch.local?.nome_local) || '—'}</td>
+        <td>${safe(ch.maquina?.nome_maquina) || '—'}</td>
+        <td title="${safe(ch.descricao_problema) || ''}">${resumir(ch.descricao_problema, 90)}</td>
+        <td>${safe(solicitanteFmt)}</td>
+        <td>${safe(tecnicoAtualFmt)}</td>
+        <td>${safe(ch.status_chamado)} ${badgeEmg}</td>
+        <td class="acoes">${botoes}</td>
+      </tr>
+    `;
+  }).join("");
+
+  // 5) Delegar cliques (detalhe / atender)
   tbody.addEventListener('click', async (ev) => {
     const btn = ev.target.closest('button[data-action]');
     if (!btn) return;
@@ -132,17 +241,48 @@ async function atualizarChamados() {
     }
 
     if (acao === 'atender') {
-      await atualizarStatusChamado(id, "Em Andamento", "Chamado atendido");
-      await atualizarCards(); 
-      await atualizarChamados();
-      return;
-    }
+      const me = getUserSessao();
+      if (!me) { alert("⚠️ Sessão não encontrada."); return; }
 
-    if (acao === 'concluir') {
-      await atualizarStatusChamado(id, "Concluído", "Chamado concluído");
+      // 5.1 cria atendimento_em_aberto
+      const { error: insErr } = await supabase
+        .from("atendimento_chamado")
+        .insert([{
+          id_chamado: id,
+          id_tecnico: me.id, // pego do localStorage (mcv_user.id)
+          hora_inicio_atendimento: new Date().toISOString(),
+          descricao_andamento: "Atendimento iniciado"
+        }]);
+
+      if (insErr) {
+        console.error(insErr);
+        alert("❌ Não foi possível assumir o atendimento.");
+        return;
+      }
+
+      // 5.2 atualiza status do chamado
+      const { error: upErr } = await supabase
+        .from("chamado")
+        .update({ status_chamado: "Em Andamento" })
+        .eq("id_chamado", id);
+
+      if (upErr) {
+        console.error(upErr);
+        alert("❌ Erro ao atualizar status do chamado.");
+        return;
+      }
+
+      // 5.3 histórico (opcional)
+      await supabase.from("historico_acao").insert([{
+        id_chamado: id,
+        id_usuario: me.id || null,
+        tipo_acao: "Status",
+        descricao_acao: `Chamado atendido por ${me.nome}${me.chapa ? " ("+me.chapa+")" : ""}`,
+        data_hora_acao: new Date().toISOString()
+      }]);
+
       await atualizarCards();
       await atualizarChamados();
-      return;
     }
   }, { once: true });
 }

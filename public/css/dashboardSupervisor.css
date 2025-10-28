@@ -216,15 +216,22 @@ td:first-child strong {
   font-family: 'Courier New', monospace;
 }
 
-td.acoes button {
-  margin: 2px 4px;
-  padding: 6px 10px;
-  border: 0;
-  border-radius: 6px;
-  cursor: pointer;
+td.acoes { white-space: nowrap; }
+td.acoes .btn-detalhe,
+td.acoes .btn-atender {
+  padding: 6px 10px; border: 0; border-radius: 8px; cursor: pointer;
+  font-weight: 600; margin-right: 6px;
 }
 td.acoes .btn-detalhe  { background:#0b74d0; color:#fff; }
-td.acoes .btn-atender  { background:#f59e0b; color:#fff; }
-td.acoes .btn-concluir { background:#10b981; color:#fff; }
-td.acoes button:hover  { opacity: .9; }
+td.acoes .btn-atender  { background:#f59e0b; color:#1f2937; }
+td.acoes .btn-detalhe:hover,
+td.acoes .btn-atender:hover { opacity:.9; }
+
+td.acoes .pill-you {
+  display:inline-block; padding:6px 10px; border-radius: 999px;
+  background:#e5f4ff; color:#0b74d0; font-weight:600;
+}
+
+.link-id { color:#0b74d0; text-decoration:none; font-weight:700; }
+.link-id:hover { text-decoration:underline; }
 
