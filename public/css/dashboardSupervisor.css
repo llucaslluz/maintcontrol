@@ -209,3 +209,10 @@ h1 {
     border-bottom: none;
   }
 }
+
+td:first-child strong {
+  color: #2e4575;
+  letter-spacing: 1px;
+  font-family: 'Courier New', monospace;
+}
+
