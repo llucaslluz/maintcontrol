@@ -129,54 +129,108 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // ------------ ações ------------
-  async function atenderChamado() {
-    if (!podeAtender) return alert('Sem permissão.');
-    const descricao = prompt('Descrição do início do atendimento (opcional):') || 'Atendimento iniciado';
-    // 1) muda status do chamado
-    const { error: e1 } = await supa
-      .from('chamado')
-      .update({ status_chamado: 'Em Andamento' })
-      .eq('id_chamado', id);
-    if (e1) return alert('Erro ao iniciar atendimento.');
+async function atenderChamado() {
+  if (!podeAtender) return alert('Sem permissão.');
 
-    // 2) registra em historico_acao
+  const descricao = prompt('Descrição do início do atendimento (opcional):') || 'Atendimento iniciado';
+
+  // 0) evita atendimento duplicado em aberto
+  const { data: abertos, error: eCheck } = await supa
+    .from('atendimento_chamado')
+    .select('id_atendimento, id_chamado, id_tecnico, hora_fim_atendimento')
+    .eq('id_chamado', id)
+    .is('hora_fim_atendimento', null)
+    .limit(1);
+
+  if (eCheck) {
+    console.error(eCheck);
+    return alert('Erro ao validar atendimento aberto.');
+  }
+  if (abertos && abertos.length) {
+    // já existe alguém atendendo — só muda status e registra histórico
+    await supa.from('chamado').update({ status_chamado: 'Em Andamento' }).eq('id_chamado', id);
     await supa.from('historico_acao').insert([{
-      tipo_acao: 'Atendimento iniciado',
-      descricao_acao: `${user?.nome || 'Usuário'}: ${descricao}`,
+      tipo_acao: 'Atendimento',
+      descricao_acao: `${user?.nome || 'Usuário'} sinalizou atendimento em andamento: ${descricao}`,
       id_usuario: user?.id || null,
       id_chamado: id
     }]);
-
-    alert('Atendimento iniciado.');
-    render();
+    alert('Chamado já está em atendimento.');
+    return render();
   }
 
-  async function finalizarChamado() {
-    if (!podeFechar) return alert('Sem permissão.');
-    const obs = prompt('Observação de fechamento (opcional):') || '';
-    const agora = new Date().toISOString();
-    // 1) fecha chamado
-    const { error: e1 } = await supa
-      .from('chamado')
-      .update({
-        status_chamado: 'Concluído',
-        data_hora_fechamento: agora,
-        observacao_fechamento: obs
-      })
-      .eq('id_chamado', id);
-    if (e1) return alert('Erro ao finalizar chamado.');
-
-    // 2) historico
-    await supa.from('historico_acao').insert([{
-      tipo_acao: 'Fechamento',
-      descricao_acao: `${user?.nome || 'Usuário'} finalizou o chamado. ${obs}`,
-      id_usuario: user?.id || null,
-      id_chamado: id
-    }]);
-
-    alert('Chamado finalizado.');
-    render();
+  // 1) cria o atendimento em aberto
+  const { error: eIns } = await supa.from('atendimento_chamado').insert([{
+    id_chamado: id,
+    id_tecnico: user?.id || null,
+    hora_inicio_atendimento: new Date().toISOString(),
+    descricao_andamento: descricao
+  }]);
+  if (eIns) {
+    console.error(eIns);
+    return alert('Erro ao criar atendimento.');
   }
+
+  // 2) muda status do chamado
+  const { error: eUp } = await supa
+    .from('chamado')
+    .update({ status_chamado: 'Em Andamento' })
+    .eq('id_chamado', id);
+  if (eUp) return alert('Erro ao atualizar status do chamado.');
+
+  // 3) histórico
+  await supa.from('historico_acao').insert([{
+    tipo_acao: 'Atendimento iniciado',
+    descricao_acao: `${user?.nome || 'Usuário'}: ${descricao}`,
+    id_usuario: user?.id || null,
+    id_chamado: id
+  }]);
+
+  alert('Atendimento iniciado.');
+  render();
+}
+
+async function finalizarChamado() {
+  if (!podeFechar) return alert('Sem permissão.');
+
+  const obs = prompt('Observação de fechamento (obrigatória para concluir):');
+  if (obs === null) return; // cancelou
+  const agora = new Date().toISOString();
+
+  // 1) fecha quaisquer atendimentos em aberto deste chamado
+  const { error: eCloseAtd } = await supa
+    .from('atendimento_chamado')
+    .update({ hora_fim_atendimento: agora })
+    .eq('id_chamado', id)
+    .is('hora_fim_atendimento', null);
+  if (eCloseAtd) {
+    console.error(eCloseAtd);
+    return alert('Erro ao encerrar atendimento em aberto.');
+  }
+
+  // 2) fecha chamado
+  const { error: eUp } = await supa
+    .from('chamado')
+    .update({
+      status_chamado: 'Concluído',
+      data_hora_fechamento: agora,
+      observacao_fechamento: obs || ''
+    })
+    .eq('id_chamado', id);
+  if (eUp) return alert('Erro ao finalizar chamado.');
+
+  // 3) histórico
+  await supa.from('historico_acao').insert([{
+    tipo_acao: 'Fechamento',
+    descricao_acao: `${user?.nome || 'Usuário'} finalizou o chamado. ${obs || ''}`,
+    id_usuario: user?.id || null,
+    id_chamado: id
+  }]);
+
+  alert('Chamado finalizado.');
+  render();
+}
+
 
   async function criarPendencia() {
     const desc = prompt('Descreva a pendência:');
