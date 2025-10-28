@@ -216,3 +216,15 @@ td:first-child strong {
   font-family: 'Courier New', monospace;
 }
 
+td.acoes button {
+  margin: 2px 4px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+td.acoes .btn-detalhe  { background:#0b74d0; color:#fff; }
+td.acoes .btn-atender  { background:#f59e0b; color:#fff; }
+td.acoes .btn-concluir { background:#10b981; color:#fff; }
+td.acoes button:hover  { opacity: .9; }
+
