@@ -2,11 +2,8 @@
 //  Botão de EMERGÊNCIA
 // =======================
 
-// Ajuste estes nomes para o seu schema:
-const TABLE_MAQUINA = 'maquina_dispositivo'; // tabela de máquinas
-const LINK_KEY      = 'id_local';            // coluna NA TABELA DE MÁQUINAS que referencia o local
-const ID_KEY        = 'id_maquina';          // coluna do ID da máquina
-const NAME_KEY      = 'nome_maquina';        // coluna do nome da máquina
+const TABLE_LOCAL   = 'local';
+const TABLE_MAQUINA = 'maquina_dispositivo';
 
 // ---- Modal ----
 function abrirModalEmergencia() {
@@ -30,22 +27,23 @@ function getUser() {
   catch { return null; }
 }
 
-// ---- Carrega Locais ----
+// ---- Carrega Locais (igual à outra tela) ----
 async function carregarLocaisEmergencia() {
   try {
     await waitForSupabase();
+
     const selLocal   = document.getElementById('local-emergencia');
     const selMaquina = document.getElementById('maquina-emergencia');
     if (!selLocal) return;
 
     selLocal.innerHTML = '<option value="">Selecione</option>';
     if (selMaquina) {
-      selMaquina.innerHTML = '<option value="">Selecione um local primeiro</option>';
+      selMaquina.innerHTML = '<option value="">Selecione</option>';
       selMaquina.disabled = true;
     }
 
     const { data, error } = await supabase
-      .from('local')
+      .from(TABLE_LOCAL)
       .select('id_local, nome_local')
       .order('nome_local', { ascending: true });
 
@@ -54,74 +52,64 @@ async function carregarLocaisEmergencia() {
       return;
     }
 
-    (data || []).forEach(loc => {
+    (data || []).forEach(local => {
       const op = document.createElement('option');
-      op.value = loc.id_local;
-      op.textContent = loc.nome_local;
+      op.value = local.id_local;
+      op.textContent = local.nome_local;
       selLocal.appendChild(op);
     });
 
-    selLocal.addEventListener('change', async () => {
-      const idLocal = selLocal.value;
-      await carregarMaquinasPorLocal(idLocal);
+    // Carrega as máquinas (todas) logo ao abrir
+    await carregarMaquinasEmergencia();
+    if (selMaquina) selMaquina.disabled = false;
+
+    // Se quiser, ao trocar local só mantemos a seleção (sem filtrar):
+    selLocal.addEventListener('change', () => {
+      // nada a fazer, as máquinas já estão listadas (sem filtro)
+      // se futuramente quiser filtrar por local, troque para:
+      // carregarMaquinasEmergencia(selLocal.value);
     });
+
   } catch (e) {
     console.error('Supabase não disponível:', e.message);
   }
 }
 
-// ---- Carrega Máquinas do Local (use as constantes acima) ----
-async function carregarMaquinasPorLocal(idLocalRaw) {
-  const selMaquina = document.getElementById('maquina-emergencia');
-  if (!selMaquina) return;
+// ---- Carrega Máquinas (mesmo caminho da tela do Usuário) ----
+// OBS: sem filtro por local, exatamente como seu "carregarMaquinas()" que funciona
+async function carregarMaquinasEmergencia(/* idLocalOpcional */) {
+  const select = document.getElementById('maquina-emergencia');
+  if (!select) return;
 
-  selMaquina.disabled = true;
-  selMaquina.innerHTML = '<option value="">Carregando...</option>';
+  select.disabled = true;
+  select.innerHTML = '<option value="">Carregando...</option>';
 
-  if (!idLocalRaw) {
-    selMaquina.innerHTML = '<option value="">Selecione um local primeiro</option>';
-    return;
-  }
-
-  // tenta manter o tipo (número vs string)
-  const n = Number(idLocalRaw);
-  const idLocal = Number.isNaN(n) ? idLocalRaw : n;
-
-  // consulta filtrando pela coluna de vínculo configurada
   const { data, error } = await supabase
     .from(TABLE_MAQUINA)
-    .select('*')
-    .eq(LINK_KEY, idLocal)
-    .order(NAME_KEY, { ascending: true });
+    .select('id_maquina, nome_maquina')
+    .order('nome_maquina', { ascending: true });
 
   if (error) {
-    console.error('Erro ao carregar máquinas:', error.message);
-    selMaquina.innerHTML = '<option value="">Não foi possível carregar</option>';
+    console.error('Erro ao carregar máquinas (emergência):', error.message);
+    select.innerHTML = '<option value="">Não foi possível carregar</option>';
     return;
   }
 
-  selMaquina.disabled = false;
-  selMaquina.innerHTML = '';
-  selMaquina.appendChild(new Option('— Sem máquina específica —', ''));
-
-  if (!data || data.length === 0) {
-    console.warn('[Emergência] Nenhuma máquina para o local', { LINK_KEY, idLocal, exemplo: data?.[0] });
-    selMaquina.appendChild(new Option('Nenhuma máquina encontrada', ''));
-    return;
-  }
-
-  // mapeia usando campos configurados; com fallback para nomes comuns
-  data.forEach(r => {
-    const id = r[ID_KEY] ?? r.id ?? r.id_dispositivo ?? r.uuid ?? r.id_maquina_dispositivo;
-    const nome = r[NAME_KEY] ?? r.nome ?? r.descricao ?? r.tag ?? r.codigo ?? 'Sem nome';
-    if (id != null) selMaquina.appendChild(new Option(nome, id));
+  select.innerHTML = '<option value="">Selecione</option>';
+  (data || []).forEach(row => {
+    const opt = document.createElement('option');
+    opt.value = row.id_maquina;
+    opt.textContent = row.nome_maquina;
+    select.appendChild(opt);
   });
 
-  // log útil para checar as chaves disponíveis
-  console.log('[Emergência] exemplo de linha de máquina:', Object.keys(data[0] || {}), data[0]);
+  // Opcional: manter a opção "Sem máquina específica"
+  select.insertBefore(new Option('— Sem máquina específica —', ''), select.firstChild);
+
+  select.disabled = false;
 }
 
-// ---- Envia Chamado ----
+// ---- Envia Chamado de Emergência ----
 async function enviarEmergencia() {
   try {
     await waitForSupabase();
@@ -138,7 +126,7 @@ async function enviarEmergencia() {
     const payload = {
       id_solicitante: user?.id || null,
       id_local: idLocal,
-      id_maquina: idMaquina || null,
+      id_maquina: idMaquina || null, // permite "sem máquina específica"
       id_tipo_manutencao: null,
       descricao_problema: '🚨 Chamado de Emergência',
       prioridade: 'Alta',
