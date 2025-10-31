@@ -2,8 +2,11 @@
 //  Botão de EMERGÊNCIA
 // =======================
 
-// ajuste se necessário para o nome da tabela de máquinas
-const TABLE_MAQUINA = 'maquina_dispositivo';
+// Ajuste estes nomes para o seu schema:
+const TABLE_MAQUINA = 'maquina_dispositivo'; // tabela de máquinas
+const LINK_KEY      = 'id_local';            // coluna NA TABELA DE MÁQUINAS que referencia o local
+const ID_KEY        = 'id_maquina';          // coluna do ID da máquina
+const NAME_KEY      = 'nome_maquina';        // coluna do nome da máquina
 
 // ---- Modal ----
 function abrirModalEmergencia() {
@@ -27,7 +30,7 @@ function getUser() {
   catch { return null; }
 }
 
-// ---- Carrega locais no select do modal ----
+// ---- Carrega Locais ----
 async function carregarLocaisEmergencia() {
   try {
     await waitForSupabase();
@@ -35,7 +38,6 @@ async function carregarLocaisEmergencia() {
     const selMaquina = document.getElementById('maquina-emergencia');
     if (!selLocal) return;
 
-    // reset
     selLocal.innerHTML = '<option value="">Selecione</option>';
     if (selMaquina) {
       selMaquina.innerHTML = '<option value="">Selecione um local primeiro</option>';
@@ -59,7 +61,6 @@ async function carregarLocaisEmergencia() {
       selLocal.appendChild(op);
     });
 
-    // quando escolher o local, carrega as máquinas
     selLocal.addEventListener('change', async () => {
       const idLocal = selLocal.value;
       await carregarMaquinasPorLocal(idLocal);
@@ -69,12 +70,11 @@ async function carregarLocaisEmergencia() {
   }
 }
 
-// ---- Carrega máquinas do local escolhido (robusta) ----
+// ---- Carrega Máquinas do Local (use as constantes acima) ----
 async function carregarMaquinasPorLocal(idLocalRaw) {
   const selMaquina = document.getElementById('maquina-emergencia');
   if (!selMaquina) return;
 
-  // Reset inicial
   selMaquina.disabled = true;
   selMaquina.innerHTML = '<option value="">Carregando...</option>';
 
@@ -83,97 +83,45 @@ async function carregarMaquinasPorLocal(idLocalRaw) {
     return;
   }
 
-  // Normaliza o id (se for número no banco, isso ajuda)
-  const idLocalNum = Number(idLocalRaw);
-  const idLocal = Number.isNaN(idLocalNum) ? idLocalRaw : idLocalNum;
+  // tenta manter o tipo (número vs string)
+  const n = Number(idLocalRaw);
+  const idLocal = Number.isNaN(n) ? idLocalRaw : n;
 
-  let data = [];
-  let error = null;
-
-  // tentativa 1: id_local = número/string
-  try {
-    const try1 = await supabase
-      .from(TABLE_MAQUINA)
-      .select('*')
-      .eq('id_local', idLocal)
-      .order('nome_maquina', { ascending: true });
-    data = try1.data || [];
-    error = try1.error;
-  } catch (e) {
-    error = e;
-  }
-
-  // tentativa 2: repetir com valor raw (útil se id for UUID como string)
-  if (!error && data.length === 0 && typeof idLocalRaw === 'string') {
-    try {
-      const try2 = await supabase
-        .from(TABLE_MAQUINA)
-        .select('*')
-        .eq('id_local', idLocalRaw)
-        .order('nome_maquina', { ascending: true });
-      data = try2.data || [];
-      error = try2.error;
-    } catch (e) {
-      error = e;
-    }
-  }
-
-  // fallback: busca tudo e filtra no cliente por possíveis chaves de local
-  let usouFallback = false;
-  if (!error && data.length === 0) {
-    const all = await supabase.from(TABLE_MAQUINA).select('*');
-    const allRows = all.data || [];
-    error = all.error;
-
-    const localKeys = [
-      'id_local', 'local_id', 'idLocal', 'idlocal',
-      'id_setor', 'setor_id', 'id_area', 'area_id'
-    ];
-    const guessKey = allRows.length ? localKeys.find(k => k in allRows[0]) : null;
-
-    if (guessKey) {
-      data = allRows.filter(r => {
-        const v = r[guessKey];
-        if (typeof v === 'number' && typeof idLocal === 'number') return v === idLocal;
-        return String(v) === String(idLocalRaw);
-      });
-      usouFallback = true;
-    } else {
-      // último recurso: exibe todas as máquinas (para não travar o fluxo)
-      data = allRows;
-      usouFallback = true;
-    }
-  }
+  // consulta filtrando pela coluna de vínculo configurada
+  const { data, error } = await supabase
+    .from(TABLE_MAQUINA)
+    .select('*')
+    .eq(LINK_KEY, idLocal)
+    .order(NAME_KEY, { ascending: true });
 
   if (error) {
-    console.error('Erro ao carregar máquinas:', error.message || error);
+    console.error('Erro ao carregar máquinas:', error.message);
     selMaquina.innerHTML = '<option value="">Não foi possível carregar</option>';
-    selMaquina.disabled = true;
     return;
   }
 
-  // Monta o select
   selMaquina.disabled = false;
   selMaquina.innerHTML = '';
   selMaquina.appendChild(new Option('— Sem máquina específica —', ''));
 
-  if (!data.length) {
+  if (!data || data.length === 0) {
+    console.warn('[Emergência] Nenhuma máquina para o local', { LINK_KEY, idLocal, exemplo: data?.[0] });
     selMaquina.appendChild(new Option('Nenhuma máquina encontrada', ''));
-  } else {
-    data.forEach(r => {
-      const id =
-        r.id_maquina ?? r.id ?? r.id_dispositivo ?? r.uuid ?? r.id_maquina_dispositivo;
-      const nome =
-        r.nome_maquina ?? r.nome ?? r.descricao ?? r.tag ?? r.codigo ?? 'Sem nome';
-      if (id != null) selMaquina.appendChild(new Option(nome, id));
-    });
+    return;
   }
 
-  console.log('[Emergência] idLocal:', idLocal, '(raw:', idLocalRaw, ')');
-  console.log('[Emergência] máquinas carregadas', { count: data.length, usouFallback, exemplo: data[0] });
+  // mapeia usando campos configurados; com fallback para nomes comuns
+  data.forEach(r => {
+    const id = r[ID_KEY] ?? r.id ?? r.id_dispositivo ?? r.uuid ?? r.id_maquina_dispositivo;
+    const nome = r[NAME_KEY] ?? r.nome ?? r.descricao ?? r.tag ?? r.codigo ?? 'Sem nome';
+    if (id != null) selMaquina.appendChild(new Option(nome, id));
+  });
+
+  // log útil para checar as chaves disponíveis
+  console.log('[Emergência] exemplo de linha de máquina:', Object.keys(data[0] || {}), data[0]);
 }
 
-// ---- Envia chamado de emergência ----
+// ---- Envia Chamado ----
 async function enviarEmergencia() {
   try {
     await waitForSupabase();
@@ -185,8 +133,6 @@ async function enviarEmergencia() {
       alert('⚠️ Selecione um local para abrir o chamado de emergência.');
       return;
     }
-    // Para obrigar máquina, descomente:
-    // if (!idMaquina) { alert('Selecione a máquina.'); return; }
 
     const user = getUser();
     const payload = {
