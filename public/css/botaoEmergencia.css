@@ -61,3 +61,17 @@
   font-size: 14px;
   margin-left: 5px;
 }
+
+#modal-emergencia select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+.botoes-modal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
