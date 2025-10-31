@@ -86,21 +86,34 @@
     <h1>Dashboard</h1>
     <p>Visão completa dos chamados, alterações recentes e atalhos de gestão.</p>
 
-    <!-- 🔴 Botão de Emergência -->
-    <button class="botao-emergencia" onclick="abrirModalEmergencia()">🚨 EMERGÊNCIA</button>
+<!-- 🔴 Botão de Emergência -->
+<button class="botao-emergencia" onclick="abrirModalEmergencia()">🚨 EMERGÊNCIA</button>
 
-    <!-- 🔁 Modal de Emergência -->
-    <div id="modal-emergencia" class="modal hidden">
-      <div class="modal-content">
-        <h2>🚨 Abrir Chamado de Emergência</h2>
-        <label for="local-emergencia">Selecione o local:</label>
-        <select id="local-emergencia"></select>
-        <div class="botoes-modal">
-          <button onclick="enviarEmergencia()">Confirmar</button>
-          <button onclick="fecharModalEmergencia()">Cancelar</button>
-        </div>
-      </div>
+<!-- 🔁 Modal de Emergência -->
+<div id="modal-emergencia" class="modal hidden">
+  <div class="modal-content">
+    <h2>🚨 Abrir Chamado de Emergência</h2>
+
+    <!-- Local -->
+    <label for="local-emergencia">Selecione o local:</label>
+    <select id="local-emergencia">
+      <option value="">Selecione</option>
+    </select>
+
+    <!-- Máquina -->
+    <label for="maquina-emergencia">Selecione a máquina:</label>
+    <select id="maquina-emergencia" disabled>
+      <option value="">Selecione um local primeiro</option>
+    </select>
+
+    <!-- Botões -->
+    <div class="botoes-modal">
+      <button onclick="enviarEmergencia()">Confirmar</button>
+      <button onclick="fecharModalEmergencia()">Cancelar</button>
     </div>
+  </div>
+</div>
+
 
     <!-- 🔹 RESUMO -->
 <section class="resumo-status">
