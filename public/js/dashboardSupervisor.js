@@ -211,9 +211,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       return `
         <tr class="${ehEmerg ? 'chamado-emergencia' : ''}">
           <td><a href="/DetalheChamados.html?id=${encodeURIComponent(ch.id_chamado)}" class="link-id">#${idCurto(ch.id_chamado)}</a></td>
+          ${tdAbertura}
           <td>${safe(ch.local?.nome_local) || '—'}</td>
           <td>${safe(ch.maquina?.nome_maquina) || '—'}</td>
-          ${tdAbertura}
+
           <td title="${safe(ch.descricao_problema) || ''}">${resumir(ch.descricao_problema, 90)}</td>
           <td>${safe(solicitanteFmt)}</td>
           <td>${safe(tecnicoAtualFmt)}</td>

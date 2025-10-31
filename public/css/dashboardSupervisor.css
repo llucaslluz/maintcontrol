@@ -237,3 +237,9 @@ td.acoes .pill-you {
 
 .card-status.active { outline: 2px solid #2e4575; box-shadow: 0 0 0 3px rgba(46,69,117,.15) inset; }
 
+.col-abertura {
+  white-space: nowrap;   /* evita quebrar linha */
+  color: #333;
+  font-variant-numeric: tabular-nums; /* números alinhados */
+  min-width: 136px;      /* 31/10/2025 00:33 cabe bem */
+}
