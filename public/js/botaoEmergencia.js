@@ -2,6 +2,8 @@
 //  Botão de EMERGÊNCIA
 // =======================
 
+const TABLE_MAQUINA = 'maquina_dispositivo'; // ajuste se necessário
+
 // ---- Modal ----
 function abrirModalEmergencia() {
   document.getElementById('modal-emergencia')?.classList.remove('hidden');
@@ -28,10 +30,16 @@ function getUser() {
 async function carregarLocaisEmergencia() {
   try {
     await waitForSupabase();
-    const select = document.getElementById("local-emergencia");
-    if (!select) return;
+    const selLocal   = document.getElementById("local-emergencia");
+    const selMaquina = document.getElementById("maquina-emergencia");
+    if (!selLocal) return;
 
-    select.innerHTML = '<option value="">Selecione</option>';
+    // reset
+    selLocal.innerHTML   = '<option value="">Selecione</option>';
+    if (selMaquina) {
+      selMaquina.innerHTML = '<option value="">Selecione um local primeiro</option>';
+      selMaquina.disabled  = true;
+    }
 
     const { data, error } = await supabase
       .from("local")
@@ -47,11 +55,59 @@ async function carregarLocaisEmergencia() {
       const op = document.createElement("option");
       op.value = loc.id_local;
       op.textContent = loc.nome_local;
-      select.appendChild(op);
+      selLocal.appendChild(op);
     });
+
+    // quando escolher o local, carrega as máquinas
+    selLocal.addEventListener('change', async () => {
+      const idLocal = selLocal.value;
+      await carregarMaquinasPorLocal(idLocal);
+    });
+
   } catch (e) {
     console.error("Supabase não disponível:", e.message);
   }
+}
+
+// ---- Carrega máquinas do local escolhido ----
+async function carregarMaquinasPorLocal(idLocal) {
+  const selMaquina = document.getElementById("maquina-emergencia");
+  if (!selMaquina) return;
+
+  if (!idLocal) {
+    selMaquina.innerHTML = '<option value="">Selecione um local primeiro</option>';
+    selMaquina.disabled  = true;
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from(TABLE_MAQUINA)
+    .select('id_maquina, nome_maquina')
+    .eq('id_local', idLocal)
+    .order('nome_maquina', { ascending: true });
+
+  if (error) {
+    console.error("Erro ao carregar máquinas:", error.message);
+    selMaquina.innerHTML = '<option value="">Não foi possível carregar</option>';
+    selMaquina.disabled  = true;
+    return;
+  }
+
+  selMaquina.disabled = false;
+  selMaquina.innerHTML = '';
+
+  // Permitir emergência "do setor" sem máquina específica (opcional)
+  const opNone = document.createElement('option');
+  opNone.value = '';
+  opNone.textContent = '— Sem máquina específica —';
+  selMaquina.appendChild(opNone);
+
+  (data || []).forEach(m => {
+    const op = document.createElement('option');
+    op.value = m.id_maquina;
+    op.textContent = m.nome_maquina;
+    selMaquina.appendChild(op);
+  });
 }
 
 // ---- Envia chamado de emergência ----
@@ -59,17 +115,21 @@ async function enviarEmergencia() {
   try {
     await waitForSupabase();
 
-    const idLocal = document.getElementById('local-emergencia')?.value || "";
+    const idLocal   = document.getElementById('local-emergencia')?.value || '';
+    const idMaquina = document.getElementById('maquina-emergencia')?.value || '';
+
     if (!idLocal) {
       alert("⚠️ Selecione um local para abrir o chamado de emergência.");
       return;
     }
+    // Se quiser OBRIGAR escolher máquina, descomente:
+    // if (!idMaquina) { alert("Selecione a máquina."); return; }
 
     const user = getUser(); // se estiver logado, registra como solicitante
     const payload = {
       id_solicitante: user?.id || null,
       id_local: idLocal,
-      id_maquina: null,
+      id_maquina: idMaquina || null,
       id_tipo_manutencao: null,
       descricao_problema: "🚨 Chamado de Emergência",
       prioridade: "Alta",
@@ -90,11 +150,9 @@ async function enviarEmergencia() {
     alert("🚨 Chamado de emergência enviado com sucesso!");
     fecharModalEmergencia();
 
-    // pede atualização para o dashboard (se existir)
     if (typeof window.atualizarCards === "function") window.atualizarCards();
     if (typeof window.atualizarChamados === "function") window.atualizarChamados();
 
-    // evento para quem quiser escutar
     document.dispatchEvent(new CustomEvent("chamado-emergencia-aberto"));
   } catch (e) {
     console.error("Falha ao enviar emergência:", e.message);
