@@ -14,6 +14,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     ch?.emergencia === true ||
     (typeof ch?.descricao_problema === 'string' && ch.descricao_problema.includes('🚨'));
 
+  // 👉 formatador bonitinho para a coluna Abertura
+  function formatarDataHora(iso) {
+    if (!iso) return '—';
+    try {
+      const dt = new Date(iso);
+      const data = new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        timeZone: 'America/Sao_Paulo'
+      }).format(dt);
+      const hora = new Intl.DateTimeFormat('pt-BR', {
+        hour: '2-digit', minute: '2-digit',
+        timeZone: 'America/Sao_Paulo'
+      }).format(dt);
+      return `${data} ${hora}`;
+    } catch { return '—'; }
+  }
+
   // ---------- KPIs (Status + Pendências abertas) ----------
   async function contarKPIs() {
     // 1) Status
@@ -27,9 +44,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       "Aberto": 0,
       "Em Andamento": 0,
       "Concluído": 0,
-      "Com Pendência": 0,  // se você usar esse status diretamente no chamado
+      "Com Pendência": 0,
       _emergencias: 0,
-      _pendentes: 0        // contagem por chamado com pendência aberta
+      _pendentes: 0
     };
 
     for (const ch of chs) {
@@ -37,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (ch.emergencia === true) cont._emergencias++;
     }
 
-    // 2) Pendências abertas (qualquer status diferente de resolvida/fechada/concluída)
+    // 2) Pendências abertas
     const { data: pends, error: errP } = await supabase
       .from("pendencia")
       .select("id_chamado, status_pendencia");
@@ -187,11 +204,16 @@ document.addEventListener("DOMContentLoaded", async () => {
         botoes += `<span class="pill-you">Em atendimento (você)</span>`;
       }
 
+      // 💡 Nova coluna "Abertura" — usa formatarDataHora(ch.data_hora_abertura)
+      const tdAbertura =
+        `<td class="col-abertura" title="${safe(ch.data_hora_abertura)}">${formatarDataHora(ch.data_hora_abertura)}</td>`;
+
       return `
         <tr class="${ehEmerg ? 'chamado-emergencia' : ''}">
           <td><a href="/DetalheChamados.html?id=${encodeURIComponent(ch.id_chamado)}" class="link-id">#${idCurto(ch.id_chamado)}</a></td>
           <td>${safe(ch.local?.nome_local) || '—'}</td>
           <td>${safe(ch.maquina?.nome_maquina) || '—'}</td>
+          ${tdAbertura}
           <td title="${safe(ch.descricao_problema) || ''}">${resumir(ch.descricao_problema, 90)}</td>
           <td>${safe(solicitanteFmt)}</td>
           <td>${safe(tecnicoAtualFmt)}</td>
