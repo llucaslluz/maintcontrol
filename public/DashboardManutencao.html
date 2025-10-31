@@ -122,12 +122,20 @@
 <div id="modal-emergencia" class="modal hidden">
   <div class="modal-content">
     <h2>🚨 Abrir Chamado de Emergência</h2>
-    <label for="local">Selecione o local:</label>
+
+    <!-- Local -->
+    <label for="local-emergencia">Selecione o local:</label>
     <select id="local-emergencia">
-      <option>Expedição</option>
-      <option>Montagem</option>
-      <option>Usinagem</option>
+      <option value="">Selecione</option>
     </select>
+
+    <!-- Máquina -->
+    <label for="maquina-emergencia">Selecione a máquina:</label>
+    <select id="maquina-emergencia" disabled>
+      <option value="">Selecione um local primeiro</option>
+    </select>
+
+    <!-- Botões -->
     <div class="botoes-modal">
       <button onclick="enviarEmergencia()">Confirmar</button>
       <button onclick="fecharModalEmergencia()">Cancelar</button>
