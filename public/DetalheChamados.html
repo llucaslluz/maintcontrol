@@ -194,6 +194,64 @@
     <button id="btn-pendencia">⚠️ Criar Pendência</button>
     <button id="btn-anexo">📎 Anexar</button>
   </section>
+
+  <!-- MODAL: Adicionar Técnico -->
+<div id="modal-add-tecnico" class="mc-modal" hidden>
+  <div class="mc-modal-card">
+    <div class="mc-modal-head">
+      <h3>Adicionar Técnico ao Chamado</h3>
+      <button class="mc-x" data-close-modal="modal-add-tecnico">✖</button>
+    </div>
+
+    <div class="mc-modal-body">
+      <label class="mc-label">Buscar técnico (nome ou chapa)</label>
+      <input id="inp-busca-tecnico" type="text" class="mc-input" placeholder="Ex.: João, 123456" />
+
+      <ul id="lista-resultados-tecnico" class="mc-result-list">
+        <!-- resultados da busca -->
+      </ul>
+
+      <div class="mc-row">
+        <div class="mc-col">
+          <label class="mc-label">Hora de início</label>
+          <input id="inp-hora-inicio" type="datetime-local" class="mc-input" />
+        </div>
+        <div class="mc-col">
+          <label class="mc-label">Observação (opcional)</label>
+          <input id="inp-obs-inicio" type="text" class="mc-input" placeholder="Ex.: Início por inclusão manual" />
+        </div>
+      </div>
+    </div>
+
+    <div class="mc-modal-foot">
+      <button class="mc-btn-sec" data-close-modal="modal-add-tecnico">Cancelar</button>
+      <button id="btn-confirmar-add-tecnico" class="mc-btn-pri" disabled>Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Encerrar atendimento de um técnico -->
+<div id="modal-end-tecnico" class="mc-modal" hidden>
+  <div class="mc-modal-card">
+    <div class="mc-modal-head">
+      <h3>Encerrar Atendimento</h3>
+      <button class="mc-x" data-close-modal="modal-end-tecnico">✖</button>
+    </div>
+
+    <div class="mc-modal-body">
+      <p id="end-tec-info" class="mc-info">—</p>
+      <label class="mc-label">Hora de término</label>
+      <input id="inp-hora-fim" type="datetime-local" class="mc-input" />
+      <p class="mc-tip">Dica: a hora de término deve ser maior que a hora de início.</p>
+    </div>
+
+    <div class="mc-modal-foot">
+      <button class="mc-btn-sec" data-close-modal="modal-end-tecnico">Cancelar</button>
+      <button id="btn-confirmar-end-tecnico" class="mc-btn-pri">Encerrar</button>
+    </div>
+  </div>
+</div>
+
 </main>
 
 
