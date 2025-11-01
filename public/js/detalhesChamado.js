@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (error) { console.error(error); return []; }
     return data || [];
   }
-  
+
   function getInicio(t){
   return t.hora_inicio_atendimento
       || t.data_hora_inicio_atendimento
@@ -441,32 +441,56 @@ tbody.innerHTML = tecnicos.length
     });
   }
 
-  btnConfEnd?.addEventListener('click', async () => {
-    const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
-    const dtFimISO   = fromInputToISO(dtFimLocal);
+btnConfEnd?.addEventListener('click', async () => {
+  const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
+  const dtFimISO   = fromInputToISO(dtFimLocal);
 
-    if (endContext.horaInicio) {
-      const tIni = new Date(endContext.horaInicio).getTime();
-      const tFim = new Date(dtFimISO).getTime();
-      if (tFim <= tIni) return alert('A hora de término deve ser maior que a de início.');
-    }
+  if (endContext.horaInicio) {
+    const tIni = new Date(endContext.horaInicio).getTime();
+    const tFim = new Date(dtFimISO).getTime();
+    if (tFim <= tIni) return alert('A hora de término deve ser maior que a de início.');
+  }
 
-    const { error: eEnd } = await supa
+  // tenta com "hora_fim_atendimento"; se a coluna não existir, tenta "data_hora_fim_atendimento"
+  let ok = false, err1 = null, err2 = null;
+
+  try {
+    const { error } = await supa
       .from('atendimento_chamado')
       .update({ hora_fim_atendimento: dtFimISO })
       .eq('id_atendimento', endContext.idAtd);
-    if (eEnd) { console.error(eEnd); return alert('Erro ao encerrar atendimento.'); }
+    if (error) throw error;
+    ok = true;
+  } catch (e) {
+    err1 = e;
+    try {
+      const { error } = await supa
+        .from('atendimento_chamado')
+        .update({ data_hora_fim_atendimento: dtFimISO })
+        .eq('id_atendimento', endContext.idAtd);
+      if (error) throw error;
+      ok = true;
+    } catch (e2) {
+      err2 = e2;
+    }
+  }
 
-    await supa.from('historico_acao').insert([{
-      tipo_acao: 'Atendimento encerrado',
-      descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
-      id_usuario: user?.id || null,
-      id_chamado: id
-    }]);
+  if (!ok) {
+    console.error('Erro ao encerrar atendimento:', err1, err2);
+    return alert('Erro ao encerrar atendimento (ver console).');
+  }
 
-    closeModal('modal-end-tecnico');
-    await render();
-  });
+  await supa.from('historico_acao').insert([{
+    tipo_acao: 'Atendimento encerrado',
+    descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
+    id_usuario: user?.id || null,
+    id_chamado: id
+  }]);
+
+  closeModal('modal-end-tecnico');
+  await render();
+});
+
 
   // ===== histórico: adicionar nota
   document.getElementById('btn-adicionar-nota')?.addEventListener('click', async () => {
