@@ -48,19 +48,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     return data || [];
   }
 
-  async function carregarTecnicos() {
-    // IMPORTANTE: trazer o id do usuário para anexar na <tr>
-    const { data, error } = await supa
-      .from('atendimento_chamado')
-      .select(`
-        id_atendimento, hora_inicio_atendimento, hora_fim_atendimento, id_tecnico,
-        usuario:usuario (id, nome, categoria_nome)
-      `)
-      .eq('id_chamado', id)
-      .order('hora_inicio_atendimento', { ascending: false });
-    if (error) { console.error(error); return []; }
-    return data || [];
-  }
+async function carregarTecnicos() {
+  // 1) Busca os atendimentos do chamado (sem join)
+  const { data: atds, error: e1 } = await supa
+    .from('atendimento_chamado')
+    .select('id_atendimento, id_tecnico, hora_inicio_atendimento, hora_fim_atendimento') // confirme os nomes
+    .eq('id_chamado', id)
+    .order('hora_inicio_atendimento', { ascending: false }); // se o nome divergir, tire o order temporariamente
+
+  if (e1) { console.error('carregarTecnicos(atendimento_chamado):', e1); return []; }
+  if (!atds?.length) return [];
+
+  // 2) Busca os usuários pelos IDs coletados
+  const ids = [...new Set(atds.map(a => a.id_tecnico).filter(Boolean))];
+  if (!ids.length) return atds.map(a => ({ ...a, usuario: null }));
+
+  const { data: users, error: e2 } = await supa
+    .from('usuario')
+    .select('id, nome, categoria_nome');
+    // NÃO filtre por categoria aqui; mostramos o que vier
+
+  if (e2) { console.error('carregarTecnicos(usuario):', e2); return atds.map(a => ({ ...a, usuario: null })); }
+
+  const mapa = new Map(users.map(u => [String(u.id), u]));
+  return atds.map(a => ({ ...a, usuario: mapa.get(String(a.id_tecnico)) || null }));
+}
+
 
   async function carregarPendencias() {
     const { data, error } = await supa
