@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const id = params.get('id');
   if (!id) return alert('ID do chamado não informado.');
 
-  // ===== permissões simples por categoria
+  // ===== permissões
   const papel = (user?.categoria_nome || '').toLowerCase();
   const podeAtender = ['técnico','tecnico','supervisor','administrador'].includes(papel);
   const podeFechar  = ['técnico','tecnico','supervisor','administrador'].includes(papel);
 
-  // ===== helpers gerais
+  // ===== helpers
   const fmt  = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
   const safe = (s) => (s ?? '').toString();
   const pad2 = (n)=> n.toString().padStart(2,'0');
@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const fromInputToISO = (dtLocalStr) => new Date(dtLocalStr).toISOString();
   const pickUserPK = (u) => u?.id ?? u?.id_usuario ?? u?.usuario_id ?? u?.uuid ?? u?.user_id ?? null;
+
+  // campos variantes (defensivo)
+  const getInicio = (t)=> t.hora_inicio_atendimento || t.data_hora_inicio_atendimento || t.inicio_atendimento || null;
+  const getFim    = (t)=> t.hora_fim_atendimento   || t.data_hora_fim_atendimento   || t.fim_atendimento    || null;
 
   // ===== loads
   async function carregarChamado() {
@@ -55,7 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       .from('atendimento_chamado')
       .select('id_atendimento, id_tecnico, hora_inicio_atendimento, hora_fim_atendimento')
       .eq('id_chamado', id);
-      // .order('hora_inicio_atendimento', { ascending: false }) // reative quando confirmar o nome exato
     if (e1) { console.error('carregarTecnicos(atd):', e1); return []; }
     if (!atds?.length) return [];
 
@@ -90,7 +93,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       .from('pendencia')
       .select('id_pendencia, descricao_pendencia, status_pendencia, data_criacao, usuario:usuario (nome)')
       .eq('id_chamado', id);
-      // .order('data_criacao', { ascending: false }) // reative quando confirmar o nome
     if (error) { console.error(error); return []; }
     return data || [];
   }
@@ -100,24 +102,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       .from('anexo')
       .select('id_anexo, nome_arquivo, url_arquivo, data_upload')
       .eq('id_chamado', id);
-      // .order('data_upload', { ascending: false }) // reative quando confirmar o nome
     if (error) { console.error(error); return []; }
     return data || [];
   }
-
-  function getInicio(t){
-  return t.hora_inicio_atendimento
-      || t.data_hora_inicio_atendimento
-      || t.inicio_atendimento
-      || null;
-}
-function getFim(t){
-  return t.hora_fim_atendimento
-      || t.data_hora_fim_atendimento
-      || t.fim_atendimento
-      || null;
-}
-
 
   // ===== render
   async function render() {
@@ -156,22 +143,19 @@ function getFim(t){
         ).join('')
       : '<li>Sem histórico.</li>';
 
-    // técnicos
+    // técnicos (FUNÇÃO = usuario.cargo; fallback em categoria_nome)
     const tecnicos = await carregarTecnicos();
     const tbody = document.getElementById('tabela-tecnicos-body');
-
-    // onde monta as linhas dos técnicos
-tbody.innerHTML = tecnicos.length
-  ? tecnicos.map(t => `
-      <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
-        <td>${safe(t.usuario?.nome || '—')}</td>
-        <td>${safe(t.usuario?.cargo || t.usuario?.categoria_nome || '—')}</td>
-        <td>${fmt(getInicio(t))}</td>
-        <td>${getFim(t) ? fmt(getFim(t)) : '—'}</td>
-      </tr>
-    `).join('')
-  : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
-
+    tbody.innerHTML = tecnicos.length
+      ? tecnicos.map(t => `
+          <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
+            <td>${safe(t.usuario?.nome || '—')}</td>
+            <td>${safe(t.usuario?.cargo || t.usuario?.categoria_nome || '—')}</td>
+            <td>${fmt(getInicio(t))}</td>
+            <td>${getFim(t) ? fmt(getFim(t)) : '—'}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
 
     // pendências
     const pendencias = await carregarPendencias();
@@ -249,12 +233,14 @@ tbody.innerHTML = tecnicos.length
 
     const agora = new Date().toISOString();
 
-    const { error: eClose } = await supa
+    // encerra atendimentos em aberto deste chamado
+    const r1 = await supa
       .from('atendimento_chamado')
       .update({ hora_fim_atendimento: agora })
       .eq('id_chamado', id)
-      .is('hora_fim_atendimento', null);
-    if (eClose) { console.error(eClose); return alert('Erro ao encerrar atendimento em aberto.'); }
+      .is('hora_fim_atendimento', null)
+      .select('id_atendimento'); // força retornar as linhas afetadas
+    if (r1.error) { console.error(r1.error); return alert('Erro ao encerrar atendimento em aberto.'); }
 
     const { error: eUp } = await supa
       .from('chamado')
@@ -305,7 +291,7 @@ tbody.innerHTML = tecnicos.length
       setTimeout(()=>inpBusca?.focus(), 50);
     }));
 
-  // busca de técnico (nome/chapa), sem assumir nome do PK
+  // busca técnico (nome/chapa), sem assumir PK
   let buscaTimer = null;
   inpBusca?.addEventListener('input', () => {
     clearTimeout(buscaTimer);
@@ -330,9 +316,9 @@ tbody.innerHTML = tecnicos.length
         listRes.innerHTML = data.map(u => {
           const pk = pickUserPK(u);
           return `
-            <li data-userid="${pk}" data-nome="${u.nome||'-'}" data-cat="${u.categoria_nome||''}">
+            <li data-userid="${pk}" data-nome="${u.nome||'-'}" data-cat="${u.cargo || u.categoria_nome || ''}">
               <span class="mc-result-name">${u.nome||'-'}</span>
-              <span class="mc-result-meta">Chapa: ${u.chapa || '—'} • ${u.categoria_nome||'—'}</span>
+              <span class="mc-result-meta">Chapa: ${u.chapa || '—'} • ${u.cargo || u.categoria_nome || '—'}</span>
             </li>
           `;
         }).join('');
@@ -356,7 +342,7 @@ tbody.innerHTML = tecnicos.length
     }, 300);
   });
 
-  // confirmar inclusão do técnico selecionado
+  // confirmar inclusão do técnico
   btnConfAdd?.addEventListener('click', async () => {
     if (!tecnicoSelecionado) return alert('Selecione um técnico.');
     const dtIniLocal = inpIni.value || toLocalDatetimeInputValue();
@@ -396,42 +382,51 @@ tbody.innerHTML = tecnicos.length
   function posRenderEncerrarBind() {
     document.querySelectorAll('table.tabela-tecnicos tbody tr').forEach(tr => {
       const cols = tr.querySelectorAll('td');
-      const tecId = tr.getAttribute('data-tecid');
+      if (cols.length !== 4) return;
+
       const atdId = tr.getAttribute('data-atdid');
 
-      if (cols.length === 4 && cols[3].textContent.trim() === '—') {
+      if (cols[3].textContent.trim() === '—') {
         const btn = document.createElement('button');
         btn.textContent = 'Encerrar';
         btn.style.marginLeft = '8px';
 
         btn.addEventListener('click', async () => {
-          let atd;
+          // usa o id do atendimento direto quando disponível
+          let data;
           if (atdId) {
-            const { data } = await supa
+            const r = await supa
               .from('atendimento_chamado')
               .select('id_atendimento, hora_inicio_atendimento')
               .eq('id_atendimento', atdId)
               .maybeSingle();
-            atd = data;
+            data = r.data;
           } else {
-            const { data } = await supa
+            const tecId = tr.getAttribute('data-tecid');
+            const r = await supa
               .from('atendimento_chamado')
               .select('id_atendimento, hora_inicio_atendimento')
               .eq('id_chamado', id)
               .eq('id_tecnico', tecId)
               .is('hora_fim_atendimento', null)
               .maybeSingle();
-            atd = data;
+            data = r.data;
           }
-          if (!atd) return alert('Atendimento aberto não encontrado para este técnico.');
+          if (!data) return alert('Atendimento aberto não encontrado para este técnico.');
 
           endContext = {
-            idAtd: atd.id_atendimento,
+            idAtd: data.id_atendimento,
             nome: cols[0].textContent.trim(),
-            horaInicio: atd.hora_inicio_atendimento
+            horaInicio: data.hora_inicio_atendimento
           };
+
+          // hora fim default >= início (+1min)
+          const baseNow = Date.now();
+          const minEnd  = new Date(endContext.horaInicio).getTime() + 60_000;
+          const defEnd  = new Date(Math.max(baseNow, minEnd));
+          inpHoraFim.value = toLocalDatetimeInputValue(defEnd);
+
           endInfo.textContent = `Técnico: ${endContext.nome} • Início: ${cols[2].textContent.trim()}`;
-          inpHoraFim.value = toLocalDatetimeInputValue();
           openModal('modal-end-tecnico');
         });
 
@@ -441,56 +436,63 @@ tbody.innerHTML = tecnicos.length
     });
   }
 
-btnConfEnd?.addEventListener('click', async () => {
-  const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
-  const dtFimISO   = fromInputToISO(dtFimLocal);
+  btnConfEnd?.addEventListener('click', async () => {
+    const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
+    const dtFimISO   = fromInputToISO(dtFimLocal);
 
-  if (endContext.horaInicio) {
-    const tIni = new Date(endContext.horaInicio).getTime();
-    const tFim = new Date(dtFimISO).getTime();
-    if (tFim <= tIni) return alert('A hora de término deve ser maior que a de início.');
-  }
-
-  // tenta com "hora_fim_atendimento"; se a coluna não existir, tenta "data_hora_fim_atendimento"
-  let ok = false, err1 = null, err2 = null;
-
-  try {
-    const { error } = await supa
-      .from('atendimento_chamado')
-      .update({ hora_fim_atendimento: dtFimISO })
-      .eq('id_atendimento', endContext.idAtd);
-    if (error) throw error;
-    ok = true;
-  } catch (e) {
-    err1 = e;
-    try {
-      const { error } = await supa
-        .from('atendimento_chamado')
-        .update({ data_hora_fim_atendimento: dtFimISO })
-        .eq('id_atendimento', endContext.idAtd);
-      if (error) throw error;
-      ok = true;
-    } catch (e2) {
-      err2 = e2;
+    // valida fim >= início (tolerância 5s)
+    if (endContext.horaInicio) {
+      const tIni = new Date(endContext.horaInicio).getTime();
+      const tFim = new Date(dtFimISO).getTime();
+      if (tFim + 5000 < tIni) return alert('A hora de término deve ser maior ou igual à de início.');
     }
-  }
 
-  if (!ok) {
-    console.error('Erro ao encerrar atendimento:', err1, err2);
-    return alert('Erro ao encerrar atendimento (ver console).');
-  }
+    let updated = false, errPrimary = null, errFallback = null;
 
-  await supa.from('historico_acao').insert([{
-    tipo_acao: 'Atendimento encerrado',
-    descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
-    id_usuario: user?.id || null,
-    id_chamado: id
-  }]);
+    // 1) caminho principal: por id_atendimento + select para verificar linhas afetadas
+    try {
+      const { data, error } = await supa
+        .from('atendimento_chamado')
+        .update({ hora_fim_atendimento: dtFimISO })
+        .eq('id_atendimento', endContext.idAtd)
+        .select('id_atendimento');
+      if (error) throw error;
+      updated = Array.isArray(data) && data.length > 0;
+    } catch (e) {
+      errPrimary = e;
+    }
 
-  closeModal('modal-end-tecnico');
-  await render();
-});
+    // 2) fallback: por (id_chamado, fim NULL)
+    if (!updated) {
+      try {
+        const { data, error } = await supa
+          .from('atendimento_chamado')
+          .update({ hora_fim_atendimento: dtFimISO })
+          .eq('id_chamado', id)
+          .is('hora_fim_atendimento', null)
+          .select('id_atendimento');
+        if (error) throw error;
+        updated = Array.isArray(data) && data.length > 0;
+      } catch (e2) {
+        errFallback = e2;
+      }
+    }
 
+    if (!updated) {
+      console.error('Encerrar atendimento: nenhuma linha atualizada.', errPrimary, errFallback, endContext);
+      return alert('Não foi possível encerrar o atendimento (nenhuma linha atualizada).');
+    }
+
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Atendimento encerrado',
+      descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
+      id_usuario: user?.id || null,
+      id_chamado: id
+    }]);
+
+    closeModal('modal-end-tecnico');
+    await render();
+  });
 
   // ===== histórico: adicionar nota
   document.getElementById('btn-adicionar-nota')?.addEventListener('click', async () => {
