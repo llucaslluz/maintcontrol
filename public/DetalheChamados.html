@@ -106,58 +106,96 @@
   </aside>
 
   <!-- 🔶 CONTEÚDO -->
-  <main class="conteudo">
-    <h1>Detalhes do Chamado #1234</h1>
+<main class="conteudo">
+  <h1>Detalhes do Chamado</h1>
 
-    <!-- 🔹 Informações principais -->
-    <div class="info-bloco">
-      <h2>Informações Gerais</h2>
-      <p><strong>Status:</strong> Em Andamento</p>
-      <p><strong>Máquina:</strong> Prensa A1</p>
-      <p><strong>Local:</strong> Usinagem</p>
-      <p><strong>Solicitante:</strong> Carlos Silva</p>
-      <p><strong>Data de Abertura:</strong> 10/07/2025 - 14:32</p>
-      <p><strong>Prioridade:</strong> Alta</p>
-      <p><strong>Descrição:</strong> Máquina travada ao iniciar o ciclo automático.</p>
+  <!-- 🔹 Cabeçalho fixo com informações principais -->
+  <section class="bloco-cabecalho">
+    <div class="linha-info">
+      <p><strong>ID:</strong> <span id="det-id">#—</span></p>
+      <p><strong>Status:</strong> <span id="det-status" class="chip-status">—</span></p>
+      <p><strong>Prioridade:</strong> <span id="det-prioridade" class="chip-prioridade">—</span></p>
     </div>
+    <div class="linha-info">
+      <p><strong>Local:</strong> <span id="det-local">—</span></p>
+      <p><strong>Máquina:</strong> <span id="det-maquina">—</span></p>
+    </div>
+    <div class="linha-info">
+      <p><strong>Solicitante:</strong> <span id="det-solicitante">—</span></p>
+      <p><strong>Data de Abertura:</strong> <span id="det-abertura">—</span></p>
+      <p><strong>Data de Fechamento:</strong> <span id="det-fechamento">—</span></p>
+    </div>
+  </section>
 
-    <!-- 🔹 Histórico -->
+  <!-- 🔹 Descrição do problema -->
+  <section class="info-bloco">
+    <h2>Descrição do Problema</h2>
+    <p id="det-descricao">—</p>
+  </section>
+
+  <!-- 🔹 Histórico e Técnicos -->
+  <section class="duas-colunas">
     <div class="info-bloco">
-      <h2>Histórico do Chamado</h2>
-      <ul class="historico">
-        <li>[10/07/2025 14:32] Chamado aberto por Carlos Silva</li>
-        <li>[10/07/2025 15:10] Técnico João iniciou o atendimento</li>
-        <li>[10/07/2025 15:30] Status alterado para "Em Andamento"</li>
+      <h2>Histórico do Serviço</h2>
+      <ul id="lista-historico" class="historico">
+        <li>Sem histórico.</li>
       </ul>
+      <button id="btn-adicionar-nota">➕ Adicionar Nota</button>
     </div>
 
-    <!-- 🔹 Ações -->
-    <div class="info-bloco acoes-chamado">
-      <h2>Ações Disponíveis</h2>
-      <button onclick="abrirAnexo()">📎 Anexar Arquivo</button>
-      <button>✔️ Finalizar Chamado</button>
-      <button>⚠️ Criar Pendência</button>
+    <div class="info-bloco">
+      <h2>Técnicos em Atendimento</h2>
+      <table class="tabela-tecnicos">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Função</th>
+            <th>Início</th>
+            <th>Fim</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-tecnicos-body">
+          <tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>
+        </tbody>
+      </table>
+      <button id="btn-adicionar-tecnico">👷 Adicionar Técnico</button>
     </div>
+  </section>
 
-    <!-- 🔹 Modal de Anexo -->
-<div id="anexo" class="anexo-modal">
-  <h2>Anexar Arquivo</h2>
-  <p>Selecione um ou mais arquivos (máximo recomendado: 5 por vez).</p>
+  <!-- 🔹 Solução do problema -->
+  <section class="info-bloco">
+    <h2>Solução do Problema</h2>
+    <p id="det-solucao">A solução será exibida quando o chamado for finalizado.</p>
+  </section>
 
-  <!-- Input com multiple -->
-  <input type="file" id="arquivo" multiple accept="image/*,.pdf" onchange="mostrarNomeArquivos()" />
+  <!-- 🔹 Pendências -->
+  <section class="info-bloco">
+    <h2>Pendências</h2>
+    <ul id="lista-pendencias" class="lista-pendencias">
+      <li>Sem pendências registradas.</li>
+    </ul>
+    <button id="btn-adicionar-pendencia">⚠️ Adicionar Pendência</button>
+  </section>
 
-  <!-- Lista dos arquivos selecionados -->
-  <ul id="lista-arquivos" style="font-size: 14px; margin-top: 8px; color: #333; padding-left: 18px;"></ul>
+  <!-- 🔹 Anexos -->
+  <section class="info-bloco">
+    <h2>Anexos</h2>
+    <div id="lista-anexos" class="lista-anexos">
+      <p>Nenhum anexo enviado.</p>
+    </div>
+    <button id="btn-anexar">📎 Anexar Arquivo</button>
+  </section>
 
-  <br>
-  <button>
-    <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Enviar
-  </button>
-  <button onclick="fecharAnexo()">❌ Cancelar</button>
-</div>
+  <!-- 🔹 Barra de ações -->
+  <section class="barra-acoes">
+    <button id="btn-atender">🛠️ Atender Chamado</button>
+    <button id="btn-finalizar">✔️ Finalizar Chamado</button>
+    <button id="btn-add-tecnico">👷 Adicionar Técnico</button>
+    <button id="btn-pendencia">⚠️ Criar Pendência</button>
+    <button id="btn-anexo">📎 Anexar</button>
+  </section>
+</main>
 
-  </main>
 
   <!-- Ícones lucide -->
   <script>

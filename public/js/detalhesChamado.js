@@ -1,48 +1,26 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const supa = window.supabase;
-  const user = getUser(); // {id, nome, chapa, categoria_nome, ...}
+  const user = getUser();
   const params = new URLSearchParams(location.search);
   const id = params.get('id');
+  if (!id) return alert('ID do chamado não informado.');
 
-  if (!id) {
-    alert('ID do chamado não informado.');
-    return;
-  }
+  // helper formatadores
+  const fmt = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
+  const safe = (s) => (s ?? '').toString();
 
-  // elementos base
-  const blocos    = document.querySelectorAll('.info-bloco');
-  const blocoInfo = blocos[0];
-  const blocoHist = blocos[1];
-  const blocoAcoes= blocos[2];
-
-  // permissões simples por categoria
-  const papel = (user?.categoria_nome || '').toLowerCase();
-  const podeAtender = (papel === 'técnico' || papel === 'tecnico' || papel === 'supervisor' || papel === 'administrador');
-  const podeFechar  = (papel === 'técnico' || papel === 'tecnico' || papel === 'supervisor' || papel === 'administrador');
-
-  // ------------ carregar chamado + nomes ------------
   async function carregarChamado() {
     const { data, error } = await supa
       .from('chamado')
       .select(`
-        id_chamado,
-        descricao_problema,
-        prioridade,
-        status_chamado,
-        status_maquina,
-        emergencia,
-        data_hora_abertura,
-        data_hora_fechamento,
-
+        id_chamado, descricao_problema, prioridade, status_chamado,
+        data_hora_abertura, data_hora_fechamento, solucao_aplicada, observacao_fechamento,
         local:local (nome_local),
         maquina:maquina_dispositivo (nome_maquina),
-        tipo:tipo_manutencao (nome_tipo),
-
         solicitante:usuario!chamado_id_solicitante_fkey (nome, chapa)
       `)
       .eq('id_chamado', id)
       .maybeSingle();
-
     if (error) {
       console.error(error);
       alert('Erro ao carregar chamado.');
@@ -51,214 +29,122 @@ document.addEventListener('DOMContentLoaded', async () => {
     return data;
   }
 
-  // ------------ carregar histórico ------------
   async function carregarHistorico() {
-    const { data, error } = await supa
+    const { data } = await supa
       .from('historico_acao')
-      .select('id_historico,tipo_acao,descricao_acao,data_hora_acao')
+      .select('tipo_acao, descricao_acao, data_hora_acao, usuario:usuario (nome)')
       .eq('id_chamado', id)
       .order('data_hora_acao', { ascending: false });
-
-    if (error) {
-      console.error(error);
-      return [];
-    }
     return data || [];
   }
 
-  // ------------ helpers ------------
-  const fmt = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
-  const safe = (s) => (s ?? '').toString();
+  async function carregarTecnicos() {
+    const { data } = await supa
+      .from('atendimento_chamado')
+      .select(`
+        hora_inicio_atendimento, hora_fim_atendimento,
+        usuario:usuario (nome, categoria_nome)
+      `)
+      .eq('id_chamado', id);
+    return data || [];
+  }
 
-  // ------------ render ------------
+  async function carregarPendencias() {
+    const { data } = await supa
+      .from('pendencia')
+      .select('id_pendencia, descricao_pendencia, status_pendencia, data_criacao, usuario:usuario (nome)')
+      .eq('id_chamado', id);
+    return data || [];
+  }
+
+  async function carregarAnexos() {
+    const { data } = await supa
+      .from('anexo')
+      .select('id_anexo, nome_arquivo, url_arquivo, data_upload')
+      .eq('id_chamado', id);
+    return data || [];
+  }
+
   async function render() {
-    const ch = await carregarChamado();
-    if (!ch) return;
+    const chamado = await carregarChamado();
+    if (!chamado) return;
 
-    // título
-    const h1 = document.querySelector('main h1');
-    if (h1) h1.textContent = `Detalhes do Chamado #${ch.id_chamado}`;
+    // cabeçalho
+    document.getElementById('det-id').textContent = `#${chamado.id_chamado}`;
+    const statusEl = document.getElementById('det-status');
+    statusEl.textContent = safe(chamado.status_chamado);
+    statusEl.dataset.status = safe(chamado.status_chamado);
+    const prioridadeEl = document.getElementById('det-prioridade');
+    prioridadeEl.textContent = safe(chamado.prioridade);
+    prioridadeEl.dataset.prioridade = safe(chamado.prioridade);
 
-    // bloco "Informações Gerais"
-    const solicitanteNome = ch.solicitante?.nome || '—';
-    const solicitanteChapa= ch.solicitante?.chapa || '—';
-
-    blocoInfo.innerHTML = `
-      <h2>Informações Gerais</h2>
-      <p><strong>Status:</strong> ${safe(ch.status_chamado)}</p>
-      <p><strong>Máquina:</strong> ${safe(ch.maquina?.nome_maquina) || '-'}</p>
-      <p><strong>Local:</strong> ${safe(ch.local?.nome_local) || '-'}</p>
-      <p><strong>Solicitante:</strong> ${safe(solicitanteNome)} (${safe(solicitanteChapa)})</p>
-      <p><strong>Data de Abertura:</strong> ${fmt(ch.data_hora_abertura)}</p>
-      <p><strong>Prioridade:</strong> ${safe(ch.prioridade)}</p>
-      <p><strong>Descrição:</strong> ${safe(ch.descricao_problema)}</p>
-    `;
-
-    // bloco "Histórico"
-    const hist = await carregarHistorico();
-    const lis = hist.map(h =>
-      `<li>[${fmt(h.data_hora_acao)}] ${safe(h.tipo_acao)} — ${safe(h.descricao_acao)}</li>`
-    ).join('');
-    blocoHist.innerHTML = `
-      <h2>Histórico do Chamado</h2>
-      <ul class="historico">${lis || '<li>Sem histórico.</li>'}</ul>
-    `;
-
-    // bloco "Ações"
-    // mantém seus 3 botões e injeta "Iniciar atendimento" quando aplicável
-    let acoesHTML = `
-      <h2>Ações Disponíveis</h2>
-      <button onclick="abrirAnexo()">📎 Anexar Arquivo</button>
-      <button id="btn-fechar">✔️ Finalizar Chamado</button>
-      <button id="btn-pendencia">⚠️ Criar Pendência</button>
-    `;
-
-    if (podeAtender && ch.status_chamado === 'Aberto') {
-      acoesHTML += `<button id="btn-atender">🛠️ Iniciar Atendimento</button>`;
-    }
-    blocoAcoes.innerHTML = acoesHTML;
-
-    // binds
-    const btnAtender  = document.getElementById('btn-atender');
-    const btnFechar   = document.getElementById('btn-fechar');
-    const btnPendencia= document.getElementById('btn-pendencia');
-
-    if (btnAtender)  btnAtender.addEventListener('click', atenderChamado);
-    if (btnFechar)   btnFechar.addEventListener('click', finalizarChamado);
-    if (btnPendencia)btnPendencia.addEventListener('click', criarPendencia);
-  }
-
-  // ------------ ações ------------
-async function atenderChamado() {
-  if (!podeAtender) return alert('Sem permissão.');
-
-  const descricao = prompt('Descrição do início do atendimento (opcional):') || 'Atendimento iniciado';
-
-  // 0) evita atendimento duplicado em aberto
-  const { data: abertos, error: eCheck } = await supa
-    .from('atendimento_chamado')
-    .select('id_atendimento, id_chamado, id_tecnico, hora_fim_atendimento')
-    .eq('id_chamado', id)
-    .is('hora_fim_atendimento', null)
-    .limit(1);
-
-  if (eCheck) {
-    console.error(eCheck);
-    return alert('Erro ao validar atendimento aberto.');
-  }
-  if (abertos && abertos.length) {
-    // já existe alguém atendendo — só muda status e registra histórico
-    await supa.from('chamado').update({ status_chamado: 'Em Andamento' }).eq('id_chamado', id);
-    await supa.from('historico_acao').insert([{
-      tipo_acao: 'Atendimento',
-      descricao_acao: `${user?.nome || 'Usuário'} sinalizou atendimento em andamento: ${descricao}`,
-      id_usuario: user?.id || null,
-      id_chamado: id
-    }]);
-    alert('Chamado já está em atendimento.');
-    return render();
-  }
-
-  // 1) cria o atendimento em aberto
-  const { error: eIns } = await supa.from('atendimento_chamado').insert([{
-    id_chamado: id,
-    id_tecnico: user?.id || null,
-    hora_inicio_atendimento: new Date().toISOString(),
-    descricao_andamento: descricao
-  }]);
-  if (eIns) {
-    console.error(eIns);
-    return alert('Erro ao criar atendimento.');
-  }
-
-  // 2) muda status do chamado
-  const { error: eUp } = await supa
-    .from('chamado')
-    .update({ status_chamado: 'Em Andamento' })
-    .eq('id_chamado', id);
-  if (eUp) return alert('Erro ao atualizar status do chamado.');
-
-  // 3) histórico
-  await supa.from('historico_acao').insert([{
-    tipo_acao: 'Atendimento iniciado',
-    descricao_acao: `${user?.nome || 'Usuário'}: ${descricao}`,
-    id_usuario: user?.id || null,
-    id_chamado: id
-  }]);
-
-  alert('Atendimento iniciado.');
-  render();
-}
-
-async function finalizarChamado() {
-  if (!podeFechar) return alert('Sem permissão.');
-
-  const obs = prompt('Observação de fechamento (obrigatória para concluir):');
-  if (obs === null) return; // cancelou
-  const agora = new Date().toISOString();
-
-  // 1) fecha quaisquer atendimentos em aberto deste chamado
-  const { error: eCloseAtd } = await supa
-    .from('atendimento_chamado')
-    .update({ hora_fim_atendimento: agora })
-    .eq('id_chamado', id)
-    .is('hora_fim_atendimento', null);
-  if (eCloseAtd) {
-    console.error(eCloseAtd);
-    return alert('Erro ao encerrar atendimento em aberto.');
-  }
-
-  // 2) fecha chamado
-  const { error: eUp } = await supa
-    .from('chamado')
-    .update({
-      status_chamado: 'Concluído',
-      data_hora_fechamento: agora,
-      observacao_fechamento: obs || ''
-    })
-    .eq('id_chamado', id);
-  if (eUp) return alert('Erro ao finalizar chamado.');
-
-  // 3) histórico
-  await supa.from('historico_acao').insert([{
-    tipo_acao: 'Fechamento',
-    descricao_acao: `${user?.nome || 'Usuário'} finalizou o chamado. ${obs || ''}`,
-    id_usuario: user?.id || null,
-    id_chamado: id
-  }]);
-
-  alert('Chamado finalizado.');
-  render();
-}
-
-
-  async function criarPendencia() {
-    const desc = prompt('Descreva a pendência:');
-    if (!desc) return;
-    const { error } = await supa.from('pendencia').insert([{
-      descricao_pendencia: desc,
-      id_chamado: id,
-      id_usuario_criador: user?.id || null,
-      status_pendencia: 'Aberta'
-    }]);
-    if (error) return alert('Erro ao criar pendência.');
+    document.getElementById('det-local').textContent = safe(chamado.local?.nome_local);
+    document.getElementById('det-maquina').textContent = safe(chamado.maquina?.nome_maquina);
+    document.getElementById('det-solicitante').textContent = `${safe(chamado.solicitante?.nome)} (${safe(chamado.solicitante?.chapa)})`;
+    document.getElementById('det-abertura').textContent = fmt(chamado.data_hora_abertura);
+    document.getElementById('det-fechamento').textContent = fmt(chamado.data_hora_fechamento);
+    document.getElementById('det-descricao').textContent = safe(chamado.descricao_problema);
+    document.getElementById('det-solucao').textContent =
+      chamado.status_chamado === 'Concluído'
+        ? `${safe(chamado.solucao_aplicada || chamado.observacao_fechamento)}`
+        : 'A solução será exibida quando o chamado for finalizado.';
 
     // histórico
-    await supa.from('historico_acao').insert([{
-      tipo_acao: 'Pendência',
-      descricao_acao: `Criada pendência: ${desc}`,
-      id_usuario: user?.id || null,
-      id_chamado: id
-    }]);
+    const hist = await carregarHistorico();
+    const histUl = document.getElementById('lista-historico');
+    histUl.innerHTML = hist.length
+      ? hist.map(h =>
+        `<li>[${fmt(h.data_hora_acao)}] ${safe(h.usuario?.nome)} — ${safe(h.tipo_acao)}: ${safe(h.descricao_acao)}</li>`
+      ).join('')
+      : '<li>Sem histórico.</li>';
 
-    alert('Pendência criada.');
-    render();
+    // técnicos
+    const tecnicos = await carregarTecnicos();
+    const tbody = document.getElementById('tabela-tecnicos-body');
+    tbody.innerHTML = tecnicos.length
+      ? tecnicos.map(t => `
+          <tr>
+            <td>${safe(t.usuario?.nome)}</td>
+            <td>${safe(t.usuario?.categoria_nome)}</td>
+            <td>${fmt(t.hora_inicio_atendimento)}</td>
+            <td>${fmt(t.hora_fim_atendimento)}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
+
+    // pendências
+    const pendencias = await carregarPendencias();
+    const pendUl = document.getElementById('lista-pendencias');
+    pendUl.innerHTML = pendencias.length
+      ? pendencias.map(p =>
+        `<li>[${fmt(p.data_criacao)}] (${safe(p.status_pendencia)}) ${safe(p.descricao_pendencia)} — ${safe(p.usuario?.nome)}</li>`
+      ).join('')
+      : '<li>Sem pendências registradas.</li>';
+
+    // anexos
+    const anexos = await carregarAnexos();
+    const anexDiv = document.getElementById('lista-anexos');
+    anexDiv.innerHTML = anexos.length
+      ? anexos.map(a => `<p>📄 <a href="${a.url_arquivo}" target="_blank">${safe(a.nome_arquivo)}</a> — ${fmt(a.data_upload)}</p>`).join('')
+      : '<p>Nenhum anexo enviado.</p>';
   }
 
-  // ------------ init ------------
+  // inicializa
   await render();
 
-  // helpers
+  // botão adicionar nota
+  document.getElementById('btn-adicionar-nota').addEventListener('click', async () => {
+    const desc = prompt('Digite a observação ou anotação:');
+    if (!desc) return;
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Anotação',
+      descricao_acao: desc,
+      id_usuario: user?.id,
+      id_chamado: id
+    }]);
+    await render();
+  });
+
   function getUser() {
     try { return JSON.parse(localStorage.getItem('mcv_user') || 'null'); }
     catch { return null; }
