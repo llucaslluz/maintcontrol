@@ -49,44 +49,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     return data || [];
   }
 
-async function carregarTecnicos() {
-  const { data: atds, error: e1 } = await supa
-    .from('atendimento_chamado')
-    .select(`
-      id_atendimento,
-      id_tecnico,
-      hora_inicio_atendimento,
-      data_hora_inicio_atendimento,
-      hora_fim_atendimento,
-      data_hora_fim_atendimento
-    `)
-    .eq('id_chamado', id);
-  if (e1) { console.error('carregarTecnicos(atd):', e1); return []; }
-  if (!atds?.length) return [];
+  async function carregarTecnicos() {
+    // 1) atendimentos do chamado (sem join embutido)
+    const { data: atds, error: e1 } = await supa
+      .from('atendimento_chamado')
+      .select('id_atendimento, id_tecnico, hora_inicio_atendimento, hora_fim_atendimento')
+      .eq('id_chamado', id);
+      // .order('hora_inicio_atendimento', { ascending: false }) // reative quando confirmar o nome exato
+    if (e1) { console.error('carregarTecnicos(atd):', e1); return []; }
+    if (!atds?.length) return [];
 
-  const ids = [...new Set(atds.map(a => a.id_tecnico).filter(Boolean))].map(String);
-  if (!ids.length) return atds.map(a => ({ ...a, usuario: null }));
+    // 2) busca usuários pelos ids coletados (sem assumir nome do PK)
+    const ids = [...new Set(atds.map(a => a.id_tecnico).filter(Boolean))].map(String);
+    if (!ids.length) return atds.map(a => ({ ...a, usuario: null }));
 
-  let users = [];
-  try {
-    const r1 = await supa.from('usuario').select('*').in('id', ids);
-    if (r1.error) throw r1.error;
-    users = r1.data || [];
-  } catch (e) {
+    let users = [];
     try {
-      const r2 = await supa.from('usuario').select('*').in('id_usuario', ids);
-      if (r2.error) throw r2.error;
-      users = r2.data || [];
-    } catch (e2) {
-      console.error('carregarTecnicos(usuario):', e, e2);
-      users = [];
+      const r1 = await supa.from('usuario').select('*').in('id', ids);
+      if (r1.error) throw r1.error;
+      users = r1.data || [];
+    } catch (e) {
+      try {
+        const r2 = await supa.from('usuario').select('*').in('id_usuario', ids);
+        if (r2.error) throw r2.error;
+        users = r2.data || [];
+      } catch (e2) {
+        console.error('carregarTecnicos(usuario):', e, e2);
+        users = [];
+      }
     }
-  }
 
-  const getPK = (u)=> (pickUserPK(u) ?? '').toString();
-  const mapa = new Map(users.map(u => [getPK(u), u]));
-  return atds.map(a => ({ ...a, usuario: mapa.get(String(a.id_tecnico)) || null }));
-}
+    const getPK = (u)=> (pickUserPK(u) ?? '').toString();
+    const mapa = new Map(users.map(u => [getPK(u), u]));
+
+    return atds.map(a => ({ ...a, usuario: mapa.get(String(a.id_tecnico)) || null }));
+  }
 
   async function carregarPendencias() {
     const { data, error } = await supa
