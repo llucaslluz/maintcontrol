@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const id = params.get('id');
   if (!id) return alert('ID do chamado não informado.');
 
-  // ===== permissões simples por categoria
+  // ===== permissões
   const papel = (user?.categoria_nome || '').toLowerCase();
   const podeAtender = ['técnico','tecnico','supervisor','administrador'].includes(papel);
   const podeFechar  = ['técnico','tecnico','supervisor','administrador'].includes(papel);
 
-  // ===== helpers gerais
+  // ===== helpers
   const fmt  = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
   const safe = (s) => (s ?? '').toString();
   const pad2 = (n)=> n.toString().padStart(2,'0');
@@ -20,6 +20,39 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
   const fromInputToISO = (dtLocalStr) => new Date(dtLocalStr).toISOString();
   const pickUserPK = (u) => u?.id ?? u?.id_usuario ?? u?.usuario_id ?? u?.uuid ?? u?.user_id ?? null;
+
+  // campos variantes de atendimento
+  const getInicio = (t)=> t.hora_inicio_atendimento || t.data_hora_inicio_atendimento || t.inicio_atendimento || null;
+  const getFim    = (t)=> t.hora_fim_atendimento   || t.data_hora_fim_atendimento   || t.fim_atendimento    || null;
+
+  // campos variantes de anexo
+  const getAnexoNome = (a)=> a.nome_arquivo || a.nome || a.file_name || a.titulo || 'arquivo';
+  const getAnexoURL  = (a)=> a.url_arquivo  || a.url  || a.link      || a.caminho || a.path || '#';
+  const getAnexoData = (a)=> a.data_upload  || a.created_at || a.data || a.inserido_em || null;
+
+  // buscar usuários por ids (sem assumir PK)
+  async function fetchUsersByIds(idsStringArray){
+    if (!idsStringArray?.length) return new Map();
+    const ids = [...new Set(idsStringArray.map(String))];
+
+    // tenta por id
+    try {
+      const r1 = await supa.from('usuario').select('*').in('id', ids);
+      if (r1.error) throw r1.error;
+      const map1 = new Map((r1.data||[]).map(u => [String(pickUserPK(u)), u]));
+      if (map1.size) return map1;
+    } catch {}
+
+    // tenta por id_usuario
+    try {
+      const r2 = await supa.from('usuario').select('*').in('id_usuario', ids);
+      if (r2.error) throw r2.error;
+      return new Map((r2.data||[]).map(u => [String(pickUserPK(u)), u]));
+    } catch (e) {
+      console.error('fetchUsersByIds:', e);
+      return new Map();
+    }
+  }
 
   // ===== loads
   async function carregarChamado() {
@@ -50,74 +83,46 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function carregarTecnicos() {
-    // 1) atendimentos do chamado (sem join embutido)
+    // 1) atendimentos
     const { data: atds, error: e1 } = await supa
       .from('atendimento_chamado')
-      .select('id_atendimento, id_tecnico, hora_inicio_atendimento, hora_fim_atendimento')
+      .select('id_atendimento, id_tecnico, hora_inicio_atendimento, hora_fim_atendimento, data_hora_inicio_atendimento, data_hora_fim_atendimento')
       .eq('id_chamado', id);
-      // .order('hora_inicio_atendimento', { ascending: false }) // reative quando confirmar o nome exato
     if (e1) { console.error('carregarTecnicos(atd):', e1); return []; }
     if (!atds?.length) return [];
 
-    // 2) busca usuários pelos ids coletados (sem assumir nome do PK)
-    const ids = [...new Set(atds.map(a => a.id_tecnico).filter(Boolean))].map(String);
-    if (!ids.length) return atds.map(a => ({ ...a, usuario: null }));
+    // 2) map de usuários
+    const ids = atds.map(a => a.id_tecnico).filter(Boolean).map(String);
+    const usersMap = await fetchUsersByIds(ids);
 
-    let users = [];
-    try {
-      const r1 = await supa.from('usuario').select('*').in('id', ids);
-      if (r1.error) throw r1.error;
-      users = r1.data || [];
-    } catch (e) {
-      try {
-        const r2 = await supa.from('usuario').select('*').in('id_usuario', ids);
-        if (r2.error) throw r2.error;
-        users = r2.data || [];
-      } catch (e2) {
-        console.error('carregarTecnicos(usuario):', e, e2);
-        users = [];
-      }
-    }
-
-    const getPK = (u)=> (pickUserPK(u) ?? '').toString();
-    const mapa = new Map(users.map(u => [getPK(u), u]));
-
-    return atds.map(a => ({ ...a, usuario: mapa.get(String(a.id_tecnico)) || null }));
+    // 3) enriquece
+    return atds.map(a => {
+      const u = usersMap.get(String(a.id_tecnico)) || null;
+      return { ...a, usuario: u };
+    });
   }
 
   async function carregarPendencias() {
+    // sem embed (evita PGRST201). Depois enriquecemos com nome do autor.
     const { data, error } = await supa
       .from('pendencia')
-      .select('id_pendencia, descricao_pendencia, status_pendencia, data_criacao, usuario:usuario (nome)')
+      .select('id_pendencia, descricao_pendencia, status_pendencia, data_criacao, created_at, data, inserido_em, id_usuario_criador')
       .eq('id_chamado', id);
-      // .order('data_criacao', { ascending: false }) // reative quando confirmar o nome
     if (error) { console.error(error); return []; }
-    return data || [];
+    const ids = (data||[]).map(p => p.id_usuario_criador).filter(Boolean).map(String);
+    const usersMap = await fetchUsersByIds(ids);
+    return (data||[]).map(p => ({ ...p, _autor: usersMap.get(String(p.id_usuario_criador)) || null }));
   }
 
   async function carregarAnexos() {
+    // select * e fallback de campos na render
     const { data, error } = await supa
       .from('anexo')
-      .select('id_anexo, nome_arquivo, url_arquivo, data_upload')
+      .select('*')
       .eq('id_chamado', id);
-      // .order('data_upload', { ascending: false }) // reative quando confirmar o nome
     if (error) { console.error(error); return []; }
     return data || [];
   }
-
-  function getInicio(t){
-  return t.hora_inicio_atendimento
-      || t.data_hora_inicio_atendimento
-      || t.inicio_atendimento
-      || null;
-}
-function getFim(t){
-  return t.hora_fim_atendimento
-      || t.data_hora_fim_atendimento
-      || t.fim_atendimento
-      || null;
-}
-
 
   // ===== render
   async function render() {
@@ -156,37 +161,38 @@ function getFim(t){
         ).join('')
       : '<li>Sem histórico.</li>';
 
-    // técnicos
+    // técnicos (FUNÇÃO = usuario.cargo; fallback em categoria_nome)
     const tecnicos = await carregarTecnicos();
     const tbody = document.getElementById('tabela-tecnicos-body');
+    tbody.innerHTML = tecnicos.length
+      ? tecnicos.map(t => `
+          <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
+            <td>${safe(t.usuario?.nome || '—')}</td>
+            <td>${safe(t.usuario?.cargo || t.usuario?.categoria_nome || '—')}</td>
+            <td>${fmt(getInicio(t))}</td>
+            <td>${getFim(t) ? fmt(getFim(t)) : '—'}</td>
+          </tr>
+        `).join('')
+      : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
 
-    // onde monta as linhas dos técnicos
-tbody.innerHTML = tecnicos.length
-  ? tecnicos.map(t => `
-      <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
-        <td>${safe(t.usuario?.nome || '—')}</td>
-        <td>${safe(t.usuario?.cargo || t.usuario?.categoria_nome || '—')}</td>
-        <td>${fmt(getInicio(t))}</td>
-        <td>${getFim(t) ? fmt(getFim(t)) : '—'}</td>
-      </tr>
-    `).join('')
-  : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
-
-
-    // pendências
+    // pendências (sem embed; usamos _autor)
     const pendencias = await carregarPendencias();
     const pendUl = document.getElementById('lista-pendencias');
     pendUl.innerHTML = pendencias.length
-      ? pendencias.map(p =>
-          `<li>[${fmt(p.data_criacao)}] (${safe(p.status_pendencia)}) ${safe(p.descricao_pendencia)} — ${safe(p.usuario?.nome)}</li>`
-        ).join('')
+      ? pendencias.map(p => {
+          const quando = p.data_criacao || p.created_at || p.data || p.inserido_em || null;
+          const status = p.status_pendencia || p.status || '—';
+          const autor  = p._autor?.nome || '—';
+          const desc   = p.descricao_pendencia || p.descricao || '';
+          return `<li>[${fmt(quando)}] (${safe(status)}) ${safe(desc)} — ${safe(autor)}</li>`;
+        }).join('')
       : '<li>Sem pendências registradas.</li>';
 
-    // anexos
+    // anexos (fallback de campos)
     const anexos = await carregarAnexos();
     const anexDiv = document.getElementById('lista-anexos');
     anexDiv.innerHTML = anexos.length
-      ? anexos.map(a => `<p>📄 <a href="${a.url_arquivo}" target="_blank" rel="noopener">${safe(a.nome_arquivo)}</a> — ${fmt(a.data_upload)}</p>`).join('')
+      ? anexos.map(a => `<p>📄 <a href="${getAnexoURL(a)}" target="_blank" rel="noopener">${safe(getAnexoNome(a))}</a> — ${fmt(getAnexoData(a))}</p>`).join('')
       : '<p>Nenhum anexo enviado.</p>';
 
     // estado botões
@@ -195,7 +201,7 @@ tbody.innerHTML = tecnicos.length
     if (btnAtender)   btnAtender.disabled   = !(podeAtender && chamado.status_chamado === 'Aberto');
     if (btnFinalizar) btnFinalizar.disabled = !(podeFechar  && chamado.status_chamado !== 'Concluído');
 
-    // ações por linha (encerrar)
+    // binds de "Encerrar" por linha
     posRenderEncerrarBind();
   }
 
@@ -203,7 +209,6 @@ tbody.innerHTML = tecnicos.length
   async function iniciarAtendimento() {
     if (!podeAtender) return alert('Sem permissão.');
 
-    // evita atendimento duplicado
     const { data: abertos, error: eCheck } = await supa
       .from('atendimento_chamado')
       .select('id_atendimento')
@@ -249,12 +254,27 @@ tbody.innerHTML = tecnicos.length
 
     const agora = new Date().toISOString();
 
-    const { error: eClose } = await supa
-      .from('atendimento_chamado')
-      .update({ hora_fim_atendimento: agora })
-      .eq('id_chamado', id)
-      .is('hora_fim_atendimento', null);
-    if (eClose) { console.error(eClose); return alert('Erro ao encerrar atendimento em aberto.'); }
+    // encerra atendimentos em aberto (qualquer nome de coluna de fim)
+    let eClose = null;
+    try {
+      const r1 = await supa.from('atendimento_chamado')
+        .update({ hora_fim_atendimento: agora })
+        .eq('id_chamado', id)
+        .is('hora_fim_atendimento', null);
+      if (r1.error) throw r1.error;
+    } catch (e) {
+      eClose = e;
+      try {
+        const r2 = await supa.from('atendimento_chamado')
+          .update({ data_hora_fim_atendimento: agora })
+          .eq('id_chamado', id)
+          .is('data_hora_fim_atendimento', null);
+        if (r2.error) throw r2.error;
+      } catch (e2) {
+        console.error('Erro ao encerrar atendimentos em aberto:', eClose, e2);
+        return alert('Erro ao encerrar atendimento em aberto.');
+      }
+    }
 
     const { error: eUp } = await supa
       .from('chamado')
@@ -305,7 +325,7 @@ tbody.innerHTML = tecnicos.length
       setTimeout(()=>inpBusca?.focus(), 50);
     }));
 
-  // busca de técnico (nome/chapa), sem assumir nome do PK
+  // busca nome/chapa sem assumir PK
   let buscaTimer = null;
   inpBusca?.addEventListener('input', () => {
     clearTimeout(buscaTimer);
@@ -330,9 +350,9 @@ tbody.innerHTML = tecnicos.length
         listRes.innerHTML = data.map(u => {
           const pk = pickUserPK(u);
           return `
-            <li data-userid="${pk}" data-nome="${u.nome||'-'}" data-cat="${u.categoria_nome||''}">
+            <li data-userid="${pk}" data-nome="${u.nome||'-'}" data-cat="${u.cargo || u.categoria_nome || ''}">
               <span class="mc-result-name">${u.nome||'-'}</span>
-              <span class="mc-result-meta">Chapa: ${u.chapa || '—'} • ${u.categoria_nome||'—'}</span>
+              <span class="mc-result-meta">Chapa: ${u.chapa || '—'} • ${u.cargo || u.categoria_nome || '—'}</span>
             </li>
           `;
         }).join('');
@@ -356,7 +376,7 @@ tbody.innerHTML = tecnicos.length
     }, 300);
   });
 
-  // confirmar inclusão do técnico selecionado
+  // confirmar inclusão do técnico
   btnConfAdd?.addEventListener('click', async () => {
     if (!tecnicoSelecionado) return alert('Selecione um técnico.');
     const dtIniLocal = inpIni.value || toLocalDatetimeInputValue();
@@ -409,14 +429,14 @@ tbody.innerHTML = tecnicos.length
           if (atdId) {
             const { data } = await supa
               .from('atendimento_chamado')
-              .select('id_atendimento, hora_inicio_atendimento')
+              .select('id_atendimento, hora_inicio_atendimento, data_hora_inicio_atendimento')
               .eq('id_atendimento', atdId)
               .maybeSingle();
             atd = data;
           } else {
             const { data } = await supa
               .from('atendimento_chamado')
-              .select('id_atendimento, hora_inicio_atendimento')
+              .select('id_atendimento, hora_inicio_atendimento, data_hora_inicio_atendimento')
               .eq('id_chamado', id)
               .eq('id_tecnico', tecId)
               .is('hora_fim_atendimento', null)
@@ -428,10 +448,15 @@ tbody.innerHTML = tecnicos.length
           endContext = {
             idAtd: atd.id_atendimento,
             nome: cols[0].textContent.trim(),
-            horaInicio: atd.hora_inicio_atendimento
+            horaInicio: atd.hora_inicio_atendimento || atd.data_hora_inicio_atendimento
           };
+
+          // valor padrão do fim = agora **ajustado** para ser >= início
+          const baseNow = Date.now();
+          const minEnd  = new Date(endContext.horaInicio).getTime() + 60_000; // +1 min
+          const defEnd  = new Date(Math.max(baseNow, minEnd));
+          inpHoraFim.value = toLocalDatetimeInputValue(defEnd);
           endInfo.textContent = `Técnico: ${endContext.nome} • Início: ${cols[2].textContent.trim()}`;
-          inpHoraFim.value = toLocalDatetimeInputValue();
           openModal('modal-end-tecnico');
         });
 
@@ -441,56 +466,55 @@ tbody.innerHTML = tecnicos.length
     });
   }
 
-btnConfEnd?.addEventListener('click', async () => {
-  const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
-  const dtFimISO   = fromInputToISO(dtFimLocal);
+  btnConfEnd?.addEventListener('click', async () => {
+    const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
+    const dtFimISO   = fromInputToISO(dtFimLocal);
 
-  if (endContext.horaInicio) {
-    const tIni = new Date(endContext.horaInicio).getTime();
-    const tFim = new Date(dtFimISO).getTime();
-    if (tFim <= tIni) return alert('A hora de término deve ser maior que a de início.');
-  }
+    // valida fim >= início (tolerância de 5s)
+    if (endContext.horaInicio) {
+      const tIni = new Date(endContext.horaInicio).getTime();
+      const tFim = new Date(dtFimISO).getTime();
+      if (tFim + 5000 < tIni) return alert('A hora de término deve ser maior ou igual à de início.');
+    }
 
-  // tenta com "hora_fim_atendimento"; se a coluna não existir, tenta "data_hora_fim_atendimento"
-  let ok = false, err1 = null, err2 = null;
-
-  try {
-    const { error } = await supa
-      .from('atendimento_chamado')
-      .update({ hora_fim_atendimento: dtFimISO })
-      .eq('id_atendimento', endContext.idAtd);
-    if (error) throw error;
-    ok = true;
-  } catch (e) {
-    err1 = e;
+    // tenta update com os dois nomes de coluna
+    let ok = false, err1 = null, err2 = null;
     try {
       const { error } = await supa
         .from('atendimento_chamado')
-        .update({ data_hora_fim_atendimento: dtFimISO })
+        .update({ hora_fim_atendimento: dtFimISO })
         .eq('id_atendimento', endContext.idAtd);
       if (error) throw error;
       ok = true;
-    } catch (e2) {
-      err2 = e2;
+    } catch (e) {
+      err1 = e;
+      try {
+        const { error } = await supa
+          .from('atendimento_chamado')
+          .update({ data_hora_fim_atendimento: dtFimISO })
+          .eq('id_atendimento', endContext.idAtd);
+        if (error) throw error;
+        ok = true;
+      } catch (e2) {
+        err2 = e2;
+      }
     }
-  }
 
-  if (!ok) {
-    console.error('Erro ao encerrar atendimento:', err1, err2);
-    return alert('Erro ao encerrar atendimento (ver console).');
-  }
+    if (!ok) {
+      console.error('Erro ao encerrar atendimento:', err1, err2);
+      return alert('Erro ao encerrar atendimento (ver console).');
+    }
 
-  await supa.from('historico_acao').insert([{
-    tipo_acao: 'Atendimento encerrado',
-    descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
-    id_usuario: user?.id || null,
-    id_chamado: id
-  }]);
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Atendimento encerrado',
+      descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
+      id_usuario: user?.id || null,
+      id_chamado: id
+    }]);
 
-  closeModal('modal-end-tecnico');
-  await render();
-});
-
+    closeModal('modal-end-tecnico');
+    await render();
+  });
 
   // ===== histórico: adicionar nota
   document.getElementById('btn-adicionar-nota')?.addEventListener('click', async () => {
