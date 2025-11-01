@@ -13,6 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // helpers
   const fmt  = (d) => d ? new Date(d).toLocaleString('pt-BR') : '—';
   const safe = (s) => (s ?? '').toString();
+  const pad2 = (n)=> n.toString().padStart(2,'0');
+  const toLocalDatetimeInputValue = (date) => {
+    const d = new Date(date || Date.now());
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+  };
+  const fromInputToISO = (dtLocalStr) => new Date(dtLocalStr).toISOString();
 
   // ---------- loads ----------
   async function carregarChamado() {
@@ -43,10 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   async function carregarTecnicos() {
+    // IMPORTANTE: trazer o id do usuário para anexar na <tr>
     const { data, error } = await supa
       .from('atendimento_chamado')
       .select(`
-        id_atendimento, hora_inicio_atendimento, hora_fim_atendimento,
+        id_atendimento, hora_inicio_atendimento, hora_fim_atendimento, id_tecnico,
         usuario:usuario (id, nome, categoria_nome)
       `)
       .eq('id_chamado', id)
@@ -112,16 +119,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         ).join('')
       : '<li>Sem histórico.</li>';
 
-    // técnicos
+    // técnicos (grave o id do técnico no <tr>)
     const tecnicos = await carregarTecnicos();
     const tbody = document.getElementById('tabela-tecnicos-body');
     tbody.innerHTML = tecnicos.length
       ? tecnicos.map(t => `
-          <tr>
+          <tr data-tecid="${safe(t.usuario?.id || t.id_tecnico) }" data-atdid="${safe(t.id_atendimento||'')}">
             <td>${safe(t.usuario?.nome)}</td>
             <td>${safe(t.usuario?.categoria_nome)}</td>
             <td>${fmt(t.hora_inicio_atendimento)}</td>
-            <td>${fmt(t.hora_fim_atendimento)}</td>
+            <td>${t.hora_fim_atendimento ? fmt(t.hora_fim_atendimento) : '—'}</td>
           </tr>
         `).join('')
       : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
@@ -145,9 +152,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // estado dos botões (barra de ações)
     const btnAtender  = document.getElementById('btn-atender');
     const btnFinalizar= document.getElementById('btn-finalizar');
+    if (btnAtender)   btnAtender.disabled   = !(podeAtender && chamado.status_chamado === 'Aberto');
+    if (btnFinalizar) btnFinalizar.disabled = !(podeFechar  && chamado.status_chamado !== 'Concluído');
 
-    btnAtender.disabled   = !(podeAtender && chamado.status_chamado === 'Aberto');
-    btnFinalizar.disabled = !(podeFechar  && chamado.status_chamado !== 'Concluído');
+    // após montar a tabela, injeta botão "Encerrar" nas linhas abertas
+    posRenderEncerrarBind();
   }
 
   // ---------- ações ----------
@@ -236,80 +245,209 @@ document.addEventListener('DOMContentLoaded', async () => {
     alert('Chamado finalizado.');
   }
 
-  async function adicionarTecnico() {
-    if (!podeAtender) return alert('Sem permissão.');
+  // ---------- seleção de técnico (modal) ----------
+  // elementos da modal
+  const modalAdd  = document.getElementById('modal-add-tecnico');
+  const inpBusca  = document.getElementById('inp-busca-tecnico');
+  const listRes   = document.getElementById('lista-resultados-tecnico');
+  const inpIni    = document.getElementById('inp-hora-inicio');
+  const inpObsIni = document.getElementById('inp-obs-inicio');
+  const btnConfAdd= document.getElementById('btn-confirmar-add-tecnico');
+  let tecnicoSelecionado = null;
 
-    const entrada = prompt('Digite o NOME ou CHAPA do técnico que vai iniciar atendimento:');
-    if (!entrada) return;
+  function openModal(id){ document.getElementById(id).hidden = false; }
+  function closeModal(id){ document.getElementById(id).hidden = true; }
+  document.querySelectorAll('[data-close-modal]').forEach(btn=>{
+    btn.addEventListener('click', e => closeModal(e.currentTarget.getAttribute('data-close-modal')));
+  });
 
-    // tenta achar por chapa exata primeiro; depois por nome (ilike)
-    let tecnico = null;
+  // abre modal nos dois botões existentes
+  [document.getElementById('btn-adicionar-tecnico'), document.getElementById('btn-add-tecnico')]
+    .filter(Boolean)
+    .forEach(b => b.addEventListener('click', () => {
+      tecnicoSelecionado = null;
+      listRes.innerHTML = '';
+      inpBusca.value = '';
+      inpObsIni.value = '';
+      inpIni.value = toLocalDatetimeInputValue();
+      btnConfAdd.disabled = true;
+      openModal('modal-add-tecnico');
+      setTimeout(()=>inpBusca?.focus(), 50);
+    }));
 
-    const { data: porChapa } = await supa
-      .from('usuario')
-      .select('id, nome, categoria_nome, chapa')
-      .eq('chapa', entrada)
-      .limit(1);
-    if (porChapa && porChapa.length) {
-      tecnico = porChapa[0];
-    } else {
-      const { data: porNome } = await supa
+  // busca com debounce
+  let buscaTimer = null;
+  inpBusca?.addEventListener('input', () => {
+    clearTimeout(buscaTimer);
+    const q = inpBusca.value.trim();
+    if (!q){ listRes.innerHTML = ''; btnConfAdd.disabled = true; return; }
+    buscaTimer = setTimeout(async () => {
+      const { data, error } = await supa
         .from('usuario')
-        .select('id, nome, categoria_nome, chapa')
-        .ilike('nome', `%${entrada}%`)
-        .limit(1);
-      tecnico = porNome?.[0] || null;
-    }
+        .select('id, nome, chapa, categoria_nome')
+        .or(`chapa.eq.${q},nome.ilike.%${q}%`)
+        .in('categoria_nome', ['Técnico','Tecnico','técnico','tecnico']); // ajuste se necessário
+      if (error) { console.error(error); return; }
 
-    if (!tecnico) return alert('Técnico não encontrado.');
-
-    // se já existe atendimento aberto para esse técnico, oferece encerrar
-    const { data: atdAberto } = await supa
-      .from('atendimento_chamado')
-      .select('id_atendimento')
-      .eq('id_chamado', id)
-      .eq('id_tecnico', tecnico.id)
-      .is('hora_fim_atendimento', null)
-      .limit(1);
-
-    if (atdAberto?.length) {
-      const encerrar = confirm(`O técnico ${tecnico.nome} já está em atendimento. Deseja encerrar agora?`);
-      if (encerrar) {
-        const { error: eEnd } = await supa
-          .from('atendimento_chamado')
-          .update({ hora_fim_atendimento: new Date().toISOString() })
-          .eq('id_chamado', id)
-          .eq('id_tecnico', tecnico.id)
-          .is('hora_fim_atendimento', null);
-        if (eEnd) { console.error(eEnd); return alert('Erro ao encerrar atendimento do técnico.'); }
-
-        await supa.from('historico_acao').insert([{
-          tipo_acao: 'Atendimento encerrado',
-          descricao_acao: `Técnico ${tecnico.nome} encerrou o atendimento.`,
-          id_usuario: user?.id || null,
-          id_chamado: id
-        }]);
+      if (!data?.length){
+        listRes.innerHTML = `<li><span class="mc-result-name">Nenhum resultado</span></li>`;
+        tecnicoSelecionado = null;
+        btnConfAdd.disabled = true;
+        return;
       }
-    } else {
-      // cria novo atendimento
-      const { error: eIns } = await supa.from('atendimento_chamado').insert([{
-        id_chamado: id,
-        id_tecnico: tecnico.id,
-        hora_inicio_atendimento: new Date().toISOString(),
-        descricao_andamento: 'Início por inclusão manual'
-      }]);
-      if (eIns) { console.error(eIns); return alert('Erro ao iniciar atendimento para o técnico.'); }
 
-      await supa.from('historico_acao').insert([{
-        tipo_acao: 'Atendimento iniciado',
-        descricao_acao: `Técnico ${tecnico.nome} iniciou atendimento.`,
-        id_usuario: user?.id || null,
-        id_chamado: id
-      }]);
+      listRes.innerHTML = data.map(u => `
+        <li data-userid="${u.id}" data-nome="${u.nome}" data-cat="${u.categoria_nome||''}">
+          <span class="mc-result-name">${u.nome}</span>
+          <span class="mc-result-meta">Chapa: ${u.chapa || '—'} • ${u.categoria_nome||'—'}</span>
+        </li>
+      `).join('');
+
+      listRes.querySelectorAll('li[data-userid]').forEach(li => {
+        li.addEventListener('click', () => {
+          listRes.querySelectorAll('li').forEach(x => x.style.background='');
+          li.style.background = '#eef2ff';
+          tecnicoSelecionado = {
+            id:   li.getAttribute('data-userid'),
+            nome: li.getAttribute('data-nome'),
+            cat:  li.getAttribute('data-cat') || ''
+          };
+          btnConfAdd.disabled = false;
+        });
+      });
+    }, 300);
+  });
+
+  // confirmar inclusão
+  btnConfAdd?.addEventListener('click', async () => {
+    if (!tecnicoSelecionado) return;
+    const dtIniLocal = inpIni.value || toLocalDatetimeInputValue();
+    const dtIniISO   = fromInputToISO(dtIniLocal);
+    const obs        = inpObsIni.value?.trim() || 'Início por inclusão manual';
+
+    const { error: eIns } = await supa.from('atendimento_chamado').insert([{
+      id_chamado: id,
+      id_tecnico: tecnicoSelecionado.id,
+      hora_inicio_atendimento: dtIniISO,
+      descricao_andamento: obs
+    }]);
+    if (eIns){ console.error(eIns); return alert('Erro ao iniciar atendimento para o técnico.'); }
+
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Atendimento iniciado',
+      descricao_acao: `Técnico ${tecnicoSelecionado.nome} iniciou atendimento. ${obs ? '('+obs+')' : ''}`,
+      id_usuario: user?.id || null,
+      id_chamado: id
+    }]);
+
+    closeModal('modal-add-tecnico');
+    await render();
+  });
+
+  // ---------- encerrar técnico por linha ----------
+  const modalEnd   = document.getElementById('modal-end-tecnico');
+  const endInfo    = document.getElementById('end-tec-info');
+  const inpHoraFim = document.getElementById('inp-hora-fim');
+  const btnConfEnd = document.getElementById('btn-confirmar-end-tecnico');
+  let endContext = { idAtd:null, nome:'', horaInicio:null };
+
+  function posRenderEncerrarBind() {
+    document.querySelectorAll('table.tabela-tecnicos tbody tr').forEach(tr => {
+      const cols = tr.querySelectorAll('td');
+      const tecId = tr.getAttribute('data-tecid');
+      const atdId = tr.getAttribute('data-atdid'); // se já veio do select
+
+      // só cria botão se a coluna "Fim" é — (aberto)
+      if (cols.length === 4 && cols[3].textContent.trim() === '—') {
+        const btn = document.createElement('button');
+        btn.textContent = 'Encerrar';
+        btn.style.marginLeft = '8px';
+
+        btn.addEventListener('click', async () => {
+          // busca o atendimento ABERTO desse técnico específico
+          let atd;
+          if (atdId) {
+            const { data } = await supa
+              .from('atendimento_chamado')
+              .select('id_atendimento, hora_inicio_atendimento')
+              .eq('id_atendimento', atdId)
+              .maybeSingle();
+            atd = data;
+          } else {
+            const { data } = await supa
+              .from('atendimento_chamado')
+              .select('id_atendimento, hora_inicio_atendimento')
+              .eq('id_chamado', id)
+              .eq('id_tecnico', tecId)
+              .is('hora_fim_atendimento', null)
+              .maybeSingle();
+            atd = data;
+          }
+
+          if (!atd) return alert('Atendimento aberto não encontrado para este técnico.');
+
+          endContext = {
+            idAtd: atd.id_atendimento,
+            nome: cols[0].textContent.trim(),
+            horaInicio: atd.hora_inicio_atendimento
+          };
+          endInfo.textContent = `Técnico: ${endContext.nome} • Início: ${cols[2].textContent.trim()}`;
+          inpHoraFim.value = toLocalDatetimeInputValue();
+          openModal('modal-end-tecnico');
+        });
+
+        cols[3].innerHTML = '— ';
+        cols[3].appendChild(btn);
+      }
+    });
+  }
+
+  btnConfEnd?.addEventListener('click', async () => {
+    const dtFimLocal = inpHoraFim.value || toLocalDatetimeInputValue();
+    const dtFimISO   = fromInputToISO(dtFimLocal);
+
+    if (endContext.horaInicio) {
+      const tIni = new Date(endContext.horaInicio).getTime();
+      const tFim = new Date(dtFimISO).getTime();
+      if (tFim <= tIni) return alert('A hora de término deve ser maior que a de início.');
     }
 
+    const { error: eEnd } = await supa
+      .from('atendimento_chamado')
+      .update({ hora_fim_atendimento: dtFimISO })
+      .eq('id_atendimento', endContext.idAtd);
+    if (eEnd) { console.error(eEnd); return alert('Erro ao encerrar atendimento.'); }
+
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Atendimento encerrado',
+      descricao_acao: `Técnico ${endContext.nome} encerrou o atendimento.`,
+      id_usuario: user?.id || null,
+      id_chamado: id
+    }]);
+
+    closeModal('modal-end-tecnico');
     await render();
-  }
+  });
+
+  // histórico: adicionar nota
+  const btnNota = document.getElementById('btn-adicionar-nota');
+  btnNota?.addEventListener('click', async () => {
+    const desc = prompt('Digite a observação/anotação:');
+    if (!desc) return;
+    await supa.from('historico_acao').insert([{
+      tipo_acao: 'Anotação',
+      descricao_acao: desc,
+      id_usuario: user?.id || null,
+      id_chamado: id
+    }]);
+    await render();
+  });
+
+  // barra de ações
+  document.getElementById('btn-atender')?.addEventListener('click', iniciarAtendimento);
+  document.getElementById('btn-finalizar')?.addEventListener('click', finalizarChamado);
+  document.getElementById('btn-pendencia')?.addEventListener('click', criarPendencia);
+  document.getElementById('btn-anexo')?.addEventListener('click', abrirAnexoModal);
 
   async function criarPendencia() {
     const desc = prompt('Descreva a pendência:');
@@ -333,52 +471,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function abrirAnexoModal() {
-    // se sua página já tem função global abrirAnexo() (do anexoModal.js), usa ela
-    if (typeof window.abrirAnexo === 'function') {
-      window.abrirAnexo();
-    } else {
-      alert('Função de anexo não disponível nesta página.');
-    }
+    if (typeof window.abrirAnexo === 'function') window.abrirAnexo();
+    else alert('Função de anexo não disponível nesta página.');
   }
 
-  // ---------- binds ----------
-  await render();
-
-  // histórico: adicionar nota
-  const btnNota = document.getElementById('btn-adicionar-nota');
-  if (btnNota) btnNota.addEventListener('click', async () => {
-    const desc = prompt('Digite a observação/anotação:');
-    if (!desc) return;
-    await supa.from('historico_acao').insert([{
-      tipo_acao: 'Anotação',
-      descricao_acao: desc,
-      id_usuario: user?.id || null,
-      id_chamado: id
-    }]);
-    await render();
-  });
-
-  // técnicos (na caixa e na barra)
-  const btnAddTecBox = document.getElementById('btn-adicionar-tecnico');
-  if (btnAddTecBox) btnAddTecBox.addEventListener('click', adicionarTecnico);
-
-  const btnAddTecBar = document.getElementById('btn-add-tecnico');
-  if (btnAddTecBar) btnAddTecBar.addEventListener('click', adicionarTecnico);
-
-  // barra de ações
-  const btnAtender   = document.getElementById('btn-atender');
-  const btnFinalizar = document.getElementById('btn-finalizar');
-  const btnPendencia = document.getElementById('btn-pendencia');
-  const btnAnexo     = document.getElementById('btn-anexo');
-
-  if (btnAtender)   btnAtender.addEventListener('click', iniciarAtendimento);
-  if (btnFinalizar) btnFinalizar.addEventListener('click', finalizarChamado);
-  if (btnPendencia) btnPendencia.addEventListener('click', criarPendencia);
-  if (btnAnexo)     btnAnexo.addEventListener('click', abrirAnexoModal);
-
-  // util
   function getUser() {
     try { return JSON.parse(localStorage.getItem('mcv_user') || 'null'); }
     catch { return null; }
   }
+
+  // init
+  await render();
 });
