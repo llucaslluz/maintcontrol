@@ -289,18 +289,21 @@ async function carregarTecnicos() {
     }));
 
   // busca com debounce
-  let buscaTimer = null;
-  inpBusca?.addEventListener('input', () => {
-    clearTimeout(buscaTimer);
-    const q = inpBusca.value.trim();
-    if (!q){ listRes.innerHTML = ''; btnConfAdd.disabled = true; return; }
-    buscaTimer = setTimeout(async () => {
+// busca (debounce simples)
+let buscaTimer = null;
+inpBusca.addEventListener('input', () => {
+  clearTimeout(buscaTimer);
+  const q = inpBusca.value.trim();
+  if (!q){ listRes.innerHTML = ''; btnConfAdd.disabled = true; tecnicoSelecionado = null; return; }
+
+  buscaTimer = setTimeout(async () => {
+    try {
       const { data, error } = await supa
         .from('usuario')
         .select('id, nome, chapa, categoria_nome')
-        .or(`chapa.eq.${q},nome.ilike.%${q}%`)
-        .in('categoria_nome', ['Técnico','Tecnico','técnico','tecnico']); // ajuste se necessário
-      if (error) { console.error(error); return; }
+        .or(`nome.ilike.%${q}%,chapa.ilike.%${q}%`)
+        .limit(20);
+      if (error) throw error;
 
       if (!data?.length){
         listRes.innerHTML = `<li><span class="mc-result-name">Nenhum resultado</span></li>`;
@@ -328,8 +331,13 @@ async function carregarTecnicos() {
           btnConfAdd.disabled = false;
         });
       });
-    }, 300);
-  });
+    } catch (e) {
+      console.error('Erro na busca de técnico:', e);
+      alert('Erro ao buscar técnico: ' + (e?.message || e));
+    }
+  }, 300);
+});
+
 
   // confirmar inclusão
   btnConfAdd?.addEventListener('click', async () => {
