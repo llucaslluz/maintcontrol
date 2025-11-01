@@ -104,6 +104,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (error) { console.error(error); return []; }
     return data || [];
   }
+  
+  function getInicio(t){
+  return t.hora_inicio_atendimento
+      || t.data_hora_inicio_atendimento
+      || t.inicio_atendimento
+      || null;
+}
+function getFim(t){
+  return t.hora_fim_atendimento
+      || t.data_hora_fim_atendimento
+      || t.fim_atendimento
+      || null;
+}
+
 
   // ===== render
   async function render() {
@@ -145,16 +159,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // técnicos
     const tecnicos = await carregarTecnicos();
     const tbody = document.getElementById('tabela-tecnicos-body');
-    tbody.innerHTML = tecnicos.length
-      ? tecnicos.map(t => `
-          <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
-            <td>${safe(t.usuario?.nome || '—')}</td>
-            <td>${safe(t.usuario?.categoria_nome || '—')}</td>
-            <td>${fmt(t.hora_inicio_atendimento)}</td>
-            <td>${t.hora_fim_atendimento ? fmt(t.hora_fim_atendimento) : '—'}</td>
-          </tr>
-        `).join('')
-      : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
+
+    // onde monta as linhas dos técnicos
+tbody.innerHTML = tecnicos.length
+  ? tecnicos.map(t => `
+      <tr data-tecid="${safe(t.id_tecnico)}" data-atdid="${safe(t.id_atendimento||'')}">
+        <td>${safe(t.usuario?.nome || '—')}</td>
+        <td>${safe(t.usuario?.cargo || t.usuario?.categoria_nome || '—')}</td>
+        <td>${fmt(getInicio(t))}</td>
+        <td>${getFim(t) ? fmt(getFim(t)) : '—'}</td>
+      </tr>
+    `).join('')
+  : '<tr><td colspan="4">Nenhum técnico em atendimento.</td></tr>';
+
 
     // pendências
     const pendencias = await carregarPendencias();
